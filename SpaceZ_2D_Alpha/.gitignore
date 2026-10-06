@@ -1,0 +1,14 @@
+# 编译中间目录（obj / 响应文件 / 导入库）
+.build/
+
+# 控制台程序编译输出
+Main/Debug/
+
+#编译文件
+*.lib
+*.exp
+*.obj
+*.pdb
+
+.build/**/*.lib
+Main/Debug/**/*.lib

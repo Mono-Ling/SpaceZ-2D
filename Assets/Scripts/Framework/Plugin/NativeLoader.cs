@@ -20,6 +20,15 @@ namespace SpaceZ_2D.Framework.Plugin
                     throw new Exception($"【NativeLoader】Failed to load library: {path}");
                 this.Path = path;
                 UserCount = 1;
+
+#if UNITY_EDITOR
+                IntPtr procAddress = GetProcAddress(Handle, "UnityPluginLoad");
+                if (procAddress != IntPtr.Zero)
+                {
+                    var unityPluginLoad = Marshal.GetDelegateForFunctionPointer<UnityPluginLoad>(procAddress);
+                    unityPluginLoad(UnityInterfacePtr);
+                }
+#endif
             }
             public static NativeLibrary Load(string path)
             {
@@ -44,27 +53,60 @@ namespace SpaceZ_2D.Framework.Plugin
             {
                 if (Handle == IntPtr.Zero)
                     return;
+#if UNITY_EDITOR
+                IntPtr procAddress = GetProcAddress(Handle, "UnityPluginUnload");
+                if (procAddress != IntPtr.Zero)
+                {
+                    var unityPluginUnload = Marshal.GetDelegateForFunctionPointer<UnityPluginUnload>(procAddress);
+                    unityPluginUnload();
+                }
+#endif
                 FreeLibrary(Handle);
                 Handle = IntPtr.Zero;
                 _loadedLibraries.Remove(Path);
             }
         }
 
-        #region Platform APIs
+#region Platform APIs
         [DllImport("kernel32", SetLastError = true, CharSet = CharSet.Unicode)]
         private static extern IntPtr LoadLibrary([MarshalAs(UnmanagedType.LPWStr)] string path);
         [DllImport("kernel32", SetLastError = true)]
         private static extern bool FreeLibrary(IntPtr handle);
         [DllImport("kernel32", SetLastError = true, CharSet = CharSet.Ansi)]
         private static extern IntPtr GetProcAddress(IntPtr handle, [MarshalAs(UnmanagedType.LPStr)] string procName);
-        #endregion
+#endregion
 
+#if UNITY_EDITOR
+        private delegate void GetUnityInterface();
+
+        [DllImport("EditorPlugin", EntryPoint = "GetUnityInterface")]
+        private static extern IntPtr GetUnityInterfaceEditorPlugin();
+
+        private static IntPtr _unityInterfacePtr = IntPtr.Zero;
+
+        private static IntPtr UnityInterfacePtr
+        {
+            get
+            {
+                if (_unityInterfacePtr == IntPtr.Zero)
+                {
+                    _unityInterfacePtr = GetUnityInterfaceEditorPlugin();
+                    if (_unityInterfacePtr == IntPtr.Zero)
+                        throw new Exception("【NativeLoader】Failed to get Unity interface pointer from EditorPlugin.");
+                }
+                return _unityInterfacePtr;
+            }
+        }
+
+        private delegate void UnityPluginLoad(IntPtr unityInterfacePtr);
+        private delegate void UnityPluginUnload();
+#endif
         private static Dictionary<string, NativeLibrary> _loadedLibraries = new();
 
         private NativeLibrary _library;
         public NativeLoader(string path)
         {
-            var library = NativeLibrary.Load(path);
+            var library = NativeLibrary.Load(PluginUtility.GetDllPath(path));
             _library = library.Handle != IntPtr.Zero ? library : null;
         }
         public bool GetFunction<T>(string functionName, out T function) where T : Delegate

@@ -1,0 +1,99 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "构建 Unity 插件 DLL (Core+UnityPlugin)",
+            "type": "shell",
+            "command": "${workspaceFolder}\\tools\\build_plugins.bat",
+            "args": [],
+            "group": "build",
+            "problemMatcher": "$msCompile",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            },
+            "detail": "递归编译 Core 与 UnityPlugin，链接为单个 SpaceZ_2D_Alpha.dll 输出至 Assets/Plugins/x86_64"
+        },
+        {
+            "label": "构建控制台程序 (Core+Main)",
+            "type": "shell",
+            "command": "${workspaceFolder}\\tools\\build_console.bat",
+            "args": [],
+            "group": "build",
+            "problemMatcher": "$msCompile",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            },
+            "detail": "递归编译 Core 与 Main，链接为控制台程序输出至 Main/Debug"
+        },
+        {
+            "label": "构建编辑器插件 DLL (EditorPlugin)",
+            "type": "shell",
+            "command": "${workspaceFolder}\\tools\\build_editor_plugin.bat",
+            "args": [],
+            "group": "build",
+            "problemMatcher": "$msCompile",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            },
+            "detail": "递归编译 EditorPlugin，独立链接为 EditorPlugin.dll（不依赖 Core）输出至 Assets/Plugins/x86_64"
+        },
+        {
+            "label": "构建全部",
+            "dependsOn": [
+                "构建 Unity 插件 DLL (Core+UnityPlugin)",
+                "构建控制台程序 (Core+Main)",
+                "构建编辑器插件 DLL (EditorPlugin)"
+            ],
+            "dependsOrder": "sequence",
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": "$msCompile",
+            "detail": "依次构建插件 DLL、控制台程序与编辑器插件 DLL"
+        },
+        {
+            "label": "清理编译产物",
+            "type": "shell",
+            "command": "${workspaceFolder}\\tools\\clean.bat",
+            "args": [],
+            "group": "none",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            },
+            "detail": "删除 .build 中间目录、Main/Debug 产物与 Assets/Plugins/x86_64 下的 DLL"
+        },
+        {
+            "type": "cppbuild",
+            "label": "C/C++: cl.exe 生成活动文件",
+            "command": "cl.exe",
+            "args": [
+                "/Zi",
+                "/EHsc",
+                "/nologo",
+                "/Fe${fileDirname}\\${fileBasenameNoExtension}.exe",
+                "${file}"
+            ],
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "problemMatcher": [
+                "$msCompile"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "调试器生成的任务。"
+        }
+    ]
+}

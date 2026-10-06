@@ -108,4 +108,4 @@ InitTestScene*.unity*
 
 # agent
 .workbuddy
-Library/APIUpdater/project-dependencies.graph
+.zcodeignore

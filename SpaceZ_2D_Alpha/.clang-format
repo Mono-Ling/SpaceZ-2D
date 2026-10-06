@@ -1,0 +1,16 @@
+# 大括号一律独占一行(Allman),命名空间内容缩进一级
+---
+Language: Cpp
+BasedOnStyle: Microsoft
+IndentWidth: 4
+UseTab: Never
+ColumnLimit: 100
+BreakBeforeBraces: Allman
+NamespaceIndentation: All
+PointerAlignment: Left
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AccessModifierOffset: -4
+SortIncludes: false
+FixNamespaceComments: false
