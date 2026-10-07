@@ -19,6 +19,8 @@ namespace Core::Math
         float Length() const;
         float LengthSquared() const;
         Vector2 Normalized() const;
+        Vector2 ProjectionVector(const Vector2& axis) const;
+        Vector2 RejectionVector(const Vector2& axis) const;
 
         static const Vector2 zero;
         static const Vector2 one;

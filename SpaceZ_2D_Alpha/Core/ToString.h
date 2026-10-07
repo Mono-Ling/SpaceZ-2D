@@ -14,12 +14,12 @@ namespace Core
     }
 
     template<>
-    std::string ToString<std::string>(const std::string& value)
+    constexpr std::string ToString<std::string>(const std::string& value)
     {
         return value;
     }
     template<>
-    std::string ToString<const char*>(const char* const& value)
+    constexpr std::string ToString<const char*>(const char* const& value)
     {
         return std::string(value);
     }

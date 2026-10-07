@@ -49,6 +49,15 @@ namespace Core::Math
             return Vector2::zero;
         return Vector2(x / len, y / len);
     }
+    Vector2 Vector2::ProjectionVector(const Vector2& axis) const
+    {
+        auto dir = axis.Normalized();
+        return Dot(*this, dir) * dir;
+    }
+    Vector2 Vector2::RejectionVector(const Vector2& axis) const
+    {
+        return *this - ProjectionVector(axis);
+    }
 
     Vector2 operator+(const Vector2& a, const Vector2& b)
     {
