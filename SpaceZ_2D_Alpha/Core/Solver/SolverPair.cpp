@@ -40,8 +40,9 @@ namespace Core::Solver
         auto nV = Dot(vA - vB, normal);
         nV = Max(0.0f, nV);
 
-        normalImpulse = (1.0f + elasticity) / Max(invNormalEffMass, Epsilon) * nV;
-        auto p = normalImpulse * normal;
+        float curr = (1.0f + elasticity) / Max(invNormalEffMass, Epsilon) * nV;
+        normalImpulse += curr;
+        auto p = curr * normal;
         first->ApplyImpulse(-p);
         second->ApplyImpulse(p);
 
@@ -52,7 +53,7 @@ namespace Core::Solver
     {
         if(!first || !second)
             return;
-        step = Min(Epsilon, step);
+        step = Max(Epsilon, step);
         
         auto rA = point - first->position;
         auto rB = point - second->position;
@@ -80,10 +81,11 @@ namespace Core::Solver
         else
             fP = nF.Length() * dynamicFriction * step;
         
-        fP = Min(tP.Length(), fP);
         float sgn = (Dot(tV, t) >= 0.0f) ? 1.0f : -1.0f;
-        // delta
-        tP = sgn * fP * t;
+        float totalTP = Clamp(tangentImpulse + sgn * tP.Length(), -fP, fP);
+        float deltaP = totalTP - tangentImpulse;
+        tP = deltaP * t;
+        tangentImpulse = totalTP;
         
         first->ApplyImpulse(-tP);
         second->ApplyImpulse(tP);

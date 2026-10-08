@@ -207,12 +207,56 @@ static void TestFrictionImpulse()
         p.ApplyNormalImpulse();
         float j1 = p.normalImpulse;
         p.ApplyNormalImpulse();                 // 第 2 轮：nV 已打平
-        Known(j1 > 0.4f && Near(p.normalImpulse, j1),
-              "第 2 轮迭代仍保有累计法向冲量（摩擦预算不归零）");
+        Ok(j1 > 0.4f && Near(p.normalImpulse, j1),
+              "法向冲量跨轮累积：第 2 轮 nV 打平后 Jn 仍保持（摩擦预算不归零）");
     }
 }
 
 // ---------------------------------------------------------------- B1 集成
+// ---------------------------------------------------------------- A3 多轮迭代
+// 引擎默认 _iteration=4，而 A2 的每个用例只跑了「单轮」。本节点补上多轮：摩擦
+// 削减量必须与迭代轮数无关（既不过制动、也不被回推抵消）。
+static float FrictionResidualXN(float vx, float mu, int N)
+{
+    SolverRigidbody a = MakeBody(1, 1, Vector2(0, 0), Vector2(vx, 0.5f), 0);
+    SolverRigidbody s = MakeStatic(Vector2(0, 1));
+    SolverPair p(Vector2(0, 0), Vector2(0, 1));
+    MakePair(p, a, s, Vector2(0, 1), Vector2(0, 0));
+    Contact(p, mu, mu, 0.0f);
+    for (int i = 0; i < N; ++i)
+    {
+        p.ApplyNormalImpulse();
+        p.ApplyTangentImpulse(1.0f / 60.0f);
+    }
+    return a.linearVelocity.x;
+}
+
+static void TestFrictionIterationInvariance()
+{
+    Section("A3 摩擦的迭代次数无关性（多轮迭代）");
+
+    // 远超摩擦上限（vx=3.0 > mu*Jn=0.25）：削减量应恒为 0.25，轮数再多也不过制动
+    Ok(Near(FrictionResidualXN(3.0f, 0.5f, 1), 2.75f),  "vx=3.0 N=1  残速 2.75（削减 0.25）");
+    Ok(Near(FrictionResidualXN(3.0f, 0.5f, 4), 2.75f),  "vx=3.0 N=4  残速 2.75（与 N=1 一致）");
+    Ok(Near(FrictionResidualXN(3.0f, 0.5f, 16), 2.75f), "vx=3.0 N=16 残速 2.75（与 N=1 一致）");
+
+    {   // 法向冲量跨轮累积：既不归零、也不膨胀
+        SolverRigidbody a = MakeBody(1, 1, Vector2(0, 0), Vector2(1.0f, 0.5f), 0);
+        SolverRigidbody s = MakeStatic(Vector2(0, 1));
+        SolverPair p(Vector2(0, 0), Vector2(0, 1));
+        MakePair(p, a, s, Vector2(0, 1), Vector2(0, 0));
+        Contact(p, 0.5f, 0.5f, 0.0f);
+        for (int i = 0; i < 50; ++i) p.ApplyNormalImpulse();
+        Ok(Near(p.normalImpulse, 0.5f), "50 轮后 Jn 稳定在 0.5（不归零、不膨胀）");
+    }
+
+    // 残速落入摩擦锥内（vx=0.4 -> 首轮后 0.15 < 0.25）：累积量必须先累加再夹锥，
+    // 否则 N 为偶数时会把已施加的切向冲量回推（削 0.15 而非 0.25）。
+    Ok(Near(FrictionResidualXN(0.4f, 0.5f, 1), FrictionResidualXN(0.4f, 0.5f, 4)) &&
+       Near(FrictionResidualXN(0.4f, 0.5f, 1), FrictionResidualXN(0.4f, 0.5f, 16)),
+       "vx=0.4：削减量与迭代轮数无关（N=1/4/16 残速恒为 0.15）");
+}
+
 static void TestSolverIntegration()
 {
     Section("B1 PhySolver 集成（SolveStep + Foreach）");
@@ -361,7 +405,7 @@ static void TestEdgeCases()
         Collider ca, cs;
         std::vector<CollisionPair> pairs;
         buildPairs(a, ca, cs, Vector2(1, 0), pairs);
-        Known(finiteAfter(pairs, 0.0f), "dt = 0 不产生 NaN（现为 nF = nP/step -> inf*0）");
+        Ok(finiteAfter(pairs, 0.0f), "dt = 0 不产生 NaN（step 已下夹到 Epsilon，无 inf*0）");
     }
     {   // 结果是否写回原对象
         Rigidbody a(RigidbodyHandle::FromId(0));
@@ -380,6 +424,7 @@ int main()
 
     TestNormalImpulse();
     TestFrictionImpulse();
+    TestFrictionIterationInvariance();
     TestSolverIntegration();
     TestSolverContinuity();
     TestIslandDivider();

@@ -17,12 +17,13 @@ namespace Core::Solver
         float invNormalEffMass;
         float invTangentEffMass;
         float normalImpulse; // first -> second
+        float tangentImpulse;
 
         Math::Vector2 point;
         Math::Vector2 normal; // first -> second
 
         SolverPair(const Math::Vector2& point, const Math::Vector2& normal)
-        : point(point), normal(normal.Normalized()), normalImpulse(0), first(nullptr), second(nullptr) {}
+        : point(point), normal(normal.Normalized()), normalImpulse(0), tangentImpulse(0), first(nullptr), second(nullptr) {}
 
         bool IsEnable() const;
         void SetRigidbody(SolverRigidbody* first, SolverRigidbody* second);
