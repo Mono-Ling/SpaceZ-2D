@@ -3,6 +3,16 @@ using namespace Core::Math;
 
 namespace Core::Solver
 {
+    void SolverRigidbody::Reset()
+    {
+        invMass = 0;
+        invInertia = 0;
+    }
+    void SolverRigidbody::Reset(float m, float i)
+    {
+        invMass = 1 / m;
+        invInertia = 1 / i;
+    }
     void SolverRigidbody::ApplyImpulse(const Vector2& p)
     {
         linearVelocity += p * invMass;

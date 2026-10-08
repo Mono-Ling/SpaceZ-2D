@@ -1,6 +1,5 @@
 #include "Solver/SolverPair.h"
 #include "Math/Math.h"
-#include "Math/Vector3.h"
 using namespace Core::Math;
 
 namespace Core::Solver
@@ -16,14 +15,8 @@ namespace Core::Solver
         this->first = a;
         this->second = b;
 
-        float crossA = Cross(point - a->position, normal);
-        float crossB = Cross(point - b->position, normal);
-
-        // 1 / effM = 1 / m + (r x n) ^ 2 / I
-        float invEffMA = a->invMass + crossA * crossA * a->invInertia;
-        float invEffMB = b->invMass + crossB * crossB * b->invInertia;
-
-        invEffMass = invEffMA + invEffMB;
+        invNormalEffMass = GetInvEffMass(normal);
+        invTangentEffMass = GetInvEffMass(Vector2(-normal.y, normal.x));
     }
     void SolverPair::SetContact(const Collider& a, const Collider& b)
     {
@@ -47,7 +40,7 @@ namespace Core::Solver
         auto nV = Dot(vA - vB, normal);
         nV = Max(0.0f, nV);
 
-        normalImpulse = (1.0f + elasticity) / Max(invEffMass, Epsilon) * nV;
+        normalImpulse = (1.0f + elasticity) / Max(invNormalEffMass, Epsilon) * nV;
         auto p = normalImpulse * normal;
         first->ApplyImpulse(-p);
         second->ApplyImpulse(p);
@@ -59,6 +52,8 @@ namespace Core::Solver
     {
         if(!first || !second)
             return;
+        step = Min(Epsilon, step);
+        
         auto rA = point - first->position;
         auto rB = point - second->position;
 
@@ -71,7 +66,7 @@ namespace Core::Solver
         auto t = Vector2(-normal.y, normal.x);
 
         auto tV = v.ProjectionVector(t);
-        auto tP = 1.0f / Max(invEffMass, Epsilon) * tV;
+        auto tP = 1.0f / Max(invTangentEffMass, Epsilon) * tV;
 
         float fP = 0;
         if(tV.LengthSquared() < Epsilon * Epsilon)
@@ -87,12 +82,25 @@ namespace Core::Solver
         
         fP = Min(tP.Length(), fP);
         float sgn = (Dot(tV, t) >= 0.0f) ? 1.0f : -1.0f;
-        tP -= sgn * fP * t;
+        // delta
+        tP = sgn * fP * t;
         
         first->ApplyImpulse(-tP);
         second->ApplyImpulse(tP);
 
         first->ApplyImpulseMoment(Cross(rA, -tP));
         second->ApplyImpulseMoment(Cross(rB, tP));
+    }
+
+    float SolverPair::GetInvEffMass(const Math::Vector2& dir) const
+    {
+        auto d = dir.Normalized();
+        float crossA = Cross(point - first->position, d);
+        float crossB = Cross(point - second->position, d);
+
+        // 1 / effM = 1 / m + (r x n) ^ 2 / I
+        float invEffMA = first->invMass + crossA * crossA * first->invInertia;
+        float invEffMB = second->invMass + crossB * crossB * second->invInertia;
+        return invEffMA + invEffMB;
     }
 }

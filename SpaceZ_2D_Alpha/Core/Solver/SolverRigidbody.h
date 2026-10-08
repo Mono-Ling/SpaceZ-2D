@@ -13,16 +13,14 @@ namespace Core::Solver
         float angle;
         float angularVelocity;
 
-    private:
-        RigidbodyHandle _handle;
-
-    public:
         Math::Vector2 position;
         Math::Vector2 linearVelocity;
 
-        SolverRigidbody() : _handle(RigidbodyHandle::null), invMass(0), invInertia(0) {}
-        SolverRigidbody(const RigidbodyHandle& handle, float m, float i) : _handle(handle), invMass(1 / m), invInertia(1 / i) {}
+        SolverRigidbody() : invMass(0), invInertia(0) {}
+        SolverRigidbody(float m, float i) : invMass(1 / m), invInertia(1 / i) {}
 
+        void Reset();
+        void Reset(float m, float i);
         Math::Vector2 GetRealVelocity(const Math::Vector2& r) const;
         void ApplyImpulse(const Math::Vector2& p);
         void ApplyImpulseMoment(float m);

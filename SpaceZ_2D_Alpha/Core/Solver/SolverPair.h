@@ -14,7 +14,8 @@ namespace Core::Solver
         float dynamicFriction;
         float elasticity;
 
-        float invEffMass;
+        float invNormalEffMass;
+        float invTangentEffMass;
         float normalImpulse; // first -> second
 
         Math::Vector2 point;
@@ -29,5 +30,8 @@ namespace Core::Solver
 
         void ApplyNormalImpulse();
         void ApplyTangentImpulse(float step);
+    
+    private:
+        float GetInvEffMass(const Math::Vector2& dir) const;
     };
 }

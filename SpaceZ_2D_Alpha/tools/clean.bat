@@ -6,7 +6,8 @@ REM ============================================================
 REM  Remove ALL build intermediates and outputs:
 REM    1. .build\            (objects / response files / import libs)
 REM    2. Main\Debug\        (exe / pdb / ilk)
-REM    3. Assets\Plugins\x86_64\ (SpaceZ_2D_Alpha.dll, EditorPlugin.dll
+REM    3. Tests\Debug\       (test exe / pdb / ilk)
+REM    4. Assets\Plugins\x86_64\ (SpaceZ_2D_Alpha.dll, EditorPlugin.dll
 REM       and their pdb, plus Unity's same-name .meta)
 REM  Only files produced by the build scripts are deleted.
 REM ============================================================
@@ -17,11 +18,13 @@ for %%i in ("%ALPHA_ROOT%\..") do set "UNITY_ROOT=%%~fi"
 
 set "OUT_PLUGINS=%UNITY_ROOT%\Assets\Plugins\x86_64"
 set "OUT_CONSOLE=%ALPHA_ROOT%\Main\Debug"
+set "OUT_TESTS=%ALPHA_ROOT%\Tests\Debug"
 set "BUILD_DIR=%ALPHA_ROOT%\.build"
 set "DLL_NAME=SpaceZ_2D_Alpha.dll"
 set "DLL_EDITOR=EditorPlugin.dll"
 set "EXE_NAME=SpaceZ_2D_Alpha.exe"
 set "PDB_EXE=%EXE_NAME:.exe=.pdb%"
+set "EXE_TESTS=SpaceZ_SolverTests.exe"
 
 REM ---- 1. Intermediates ----
 if exist "%BUILD_DIR%" (
@@ -37,7 +40,15 @@ if exist "%OUT_CONSOLE%" (
     echo [CLEANED] Main\Debug\ executable and debug files
 )
 
-REM ---- 3. Unity plugin output (including Unity's same-name .meta) ----
+REM ---- 3. Solver test program output ----
+if exist "%OUT_TESTS%" (
+    del /q "%OUT_TESTS%\%EXE_TESTS%" 2>nul
+    del /q "%OUT_TESTS%\%EXE_TESTS:.exe=.pdb%" 2>nul
+    del /q "%OUT_TESTS%\%EXE_TESTS:.exe=.ilk%" 2>nul
+    echo [CLEANED] Tests\Debug\ executable and debug files
+)
+
+REM ---- 4. Unity plugin output (including Unity's same-name .meta) ----
 if exist "%OUT_PLUGINS%" (
     del /q "%OUT_PLUGINS%\%DLL_NAME%" 2>nul
     del /q "%OUT_PLUGINS%\%DLL_NAME%.meta" 2>nul
