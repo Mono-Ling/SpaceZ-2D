@@ -1,4 +1,5 @@
 #include "Math/Matrix3x3.h"
+#include "Math/Math.h"
 
 namespace Core::Math
 {
@@ -69,6 +70,45 @@ namespace Core::Math
             m.m00 * v.x + m.m01 * v.y,
             m.m10 * v.x + m.m11 * v.y
         );
+    }
+
+    Matrix3x3 GetTranslate(const Vector2& pos)
+    {
+        Matrix3x3 T;
+        T.m02 = pos.x;
+        T.m12 = pos.y;
+        T.m22 = 1.0f;
+        return T;
+    }
+    Matrix3x3 GetRotate(float rot)
+    {
+        Matrix3x3 R;
+        R.m00 = Cos(rot); R.m01 = -Sin(rot);
+        R.m10 = Sin(rot); R.m11 = Cos(rot);
+        return R;
+    }
+    Matrix3x3 GetScale(const Vector2& scale)
+    {
+        Matrix3x3 S;
+        S.m00 = scale.x;
+        S.m11 = scale.y;
+        return S;
+    }
+    Matrix3x3 TRS(const Vector2& pos, float rot, const Vector2& scale)
+    {
+        auto S = GetScale(scale);
+        auto R = GetRotate(rot);
+        auto T = GetTranslate(pos);
+        return T * R * S;
+    }
+    Matrix3x3 InverseTRS(const Vector2& pos, float rot, const Vector2& scale)
+    {
+        auto S = GetScale(Vector2(1.0f / Max(Epsilon, scale.x), 1.0f / Max(Epsilon, scale.y)));
+        auto R2x2 = Matrix2x2(rot);
+        R2x2.TransposeSelf();
+        auto R = Matrix3x3(R2x2);
+        auto T = GetTranslate(-pos);
+        return S * R * T;
     }
 }
 namespace Core
