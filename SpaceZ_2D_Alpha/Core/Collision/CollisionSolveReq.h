@@ -4,7 +4,7 @@
 
 namespace Core::Collision
 {
-    struct CollisionPair
+    struct CollisionSolveReq
     {
         Rigidbody* firstBody = nullptr;
         Collider* firstCollider = nullptr;
@@ -20,16 +20,6 @@ namespace Core::Collision
         Math::Vector2 firstAnchorPoint = Math::Vector2::zero;
         Math::Vector2 secondAnchorPoint = Math::Vector2::zero;
 
-        constexpr void SetCollisionRigidbody(Rigidbody* first, Rigidbody* second)
-        {
-            firstBody = first;
-            secondBody = second;
-        }
-        constexpr void SetCollisionCollider(Collider* first, Collider* second)
-        {
-            firstCollider = first;
-            secondCollider = second;
-        }
         inline void SetCollisionInfo(const Math::Vector2& p, const Math::Vector2& n, float d)
         {
             this->point = p;

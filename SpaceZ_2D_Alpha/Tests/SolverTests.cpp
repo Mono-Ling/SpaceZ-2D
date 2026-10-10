@@ -277,10 +277,10 @@ static void TestSolverIntegration()
         Collider ca, cb;
         InitCol(ca, 0.5f, 0.5f, 0.0f, a.position); ca.SetBody(a.Handle());
         InitCol(cb, 0.5f, 0.5f, 0.0f, b.position); cb.SetBody(b.Handle());
-        CollisionPair cp;
+        CollisionSolveReq cp;
         cp.SetCollisionRigidbody(&a, &b); cp.SetCollisionCollider(&ca, &cb);
         cp.SetCollisionInfo(Vector2(0.5f, 0), Vector2(1, 0), 0.5f);
-        std::vector<CollisionPair> pairs{cp};
+        std::vector<CollisionSolveReq> pairs{cp};
 
         PhySolver solver(4);
         solver.SolveStep(pairs, 1.0f / 60.0f);
@@ -298,10 +298,10 @@ static void TestSolverIntegration()
         Collider ca, cs;
         InitCol(ca, 0.5f, 0.5f, 0.0f, a.position); ca.SetBody(a.Handle());
         InitCol(cs, 0.5f, 0.5f, 0.0f, Vector2(1, 0));       // 无 body = 静态
-        CollisionPair cp;
+        CollisionSolveReq cp;
         cp.SetCollisionRigidbody(&a, nullptr); cp.SetCollisionCollider(&ca, &cs);
         cp.SetCollisionInfo(Vector2(0.5f, 0), Vector2(1, 0), 0.5f);
-        std::vector<CollisionPair> pairs{cp};
+        std::vector<CollisionSolveReq> pairs{cp};
 
         PhySolver solver(4);
         solver.SolveStep(pairs, 1.0f / 60.0f);
@@ -314,7 +314,7 @@ static void TestSolverIntegration()
     }
     {   // 空输入
         PhySolver solver(4);
-        std::vector<CollisionPair> empty;
+        std::vector<CollisionSolveReq> empty;
         solver.SolveStep(empty, 1.0f / 60.0f);
         int n = 0;
         solver.Foreach([&](const RigidbodyHandle&, const SolverRigidbody* const) { ++n; });
@@ -337,10 +337,10 @@ static void TestSolverContinuity()
         InitCol(ca, 0.5f, 0.5f, 0.0f, a.position); ca.SetBody(a.Handle());
         InitCol(cb, 0.5f, 0.5f, 0.0f, b.position); cb.SetBody(b.Handle());
 
-        CollisionPair cp;
+        CollisionSolveReq cp;
         cp.SetCollisionRigidbody(&a, &b); cp.SetCollisionCollider(&ca, &cb);
         cp.SetCollisionInfo(Vector2(0.5f, 0), Vector2(1, 0), 0.5f);
-        std::vector<CollisionPair> pairs{cp};
+        std::vector<CollisionSolveReq> pairs{cp};
         if (f % 3 == 0) pairs.push_back(cp);        // 偶尔多一个接触点
 
         solver.SolveStep(pairs, 1.0f / 60.0f);
@@ -489,11 +489,11 @@ static void TestPositionCorrectionIntegration()
     InitCol(ca, 0.5f, 0.5f, 0.0f, a.position); ca.SetBody(a.Handle());
     InitCol(cs, 0.5f, 0.5f, 0.0f, Vector2(0, 0));       // 静态体
 
-    CollisionPair cp;
+    CollisionSolveReq cp;
     cp.SetCollisionRigidbody(&a, nullptr); cp.SetCollisionCollider(&ca, &cs);
     cp.SetCollisionInfo(Vector2(0, 0), Vector2(1, 0), 0.5f);
     cp.SetCollisionPoint(Vector2(0.605f, 0), Vector2(0.5f, 0));
-    std::vector<CollisionPair> pairs{cp};
+    std::vector<CollisionSolveReq> pairs{cp};
 
     PhySolver solver(4);
     solver.SolveStep(pairs, 1.0f / 60.0f);
@@ -519,16 +519,16 @@ static void TestEdgeCases()
 
     // 一个动态体撞位于 (1,0) 的静态体
     auto buildPairs = [](Rigidbody& a, Collider& ca, Collider& cs,
-                         Vector2 normal, std::vector<CollisionPair>& out) {
+                         Vector2 normal, std::vector<CollisionSolveReq>& out) {
         InitBody(a, 1, 1, Vector2(0, 0), Vector2(1, 0), 0);
         InitCol(ca, 0.5f, 0.5f, 0.0f, a.position); ca.SetBody(a.Handle());
         InitCol(cs, 0.5f, 0.5f, 0.0f, Vector2(1, 0));
-        CollisionPair cp;
+        CollisionSolveReq cp;
         cp.SetCollisionRigidbody(&a, nullptr); cp.SetCollisionCollider(&ca, &cs);
         cp.SetCollisionInfo(Vector2(0.5f, 0), normal, 0.5f);
         out.push_back(cp);
     };
-    auto finiteAfter = [](std::vector<CollisionPair>& pairs, float dt) {
+    auto finiteAfter = [](std::vector<CollisionSolveReq>& pairs, float dt) {
         PhySolver solver(4);
         solver.SolveStep(pairs, dt);
         bool finite = true;
@@ -542,21 +542,21 @@ static void TestEdgeCases()
     {   // 零长度法线
         Rigidbody a(RigidbodyHandle::FromId(0));
         Collider ca, cs;
-        std::vector<CollisionPair> pairs;
+        std::vector<CollisionSolveReq> pairs;
         buildPairs(a, ca, cs, Vector2(0, 0), pairs);
         Ok(finiteAfter(pairs, 1.0f / 60.0f), "零长度法线 -> 速度/位置保持有限值");
     }
     {   // dt = 0
         Rigidbody a(RigidbodyHandle::FromId(0));
         Collider ca, cs;
-        std::vector<CollisionPair> pairs;
+        std::vector<CollisionSolveReq> pairs;
         buildPairs(a, ca, cs, Vector2(1, 0), pairs);
         Ok(finiteAfter(pairs, 0.0f), "dt = 0 不产生 NaN（step 已下夹到 Epsilon，无 inf*0）");
     }
     {   // 结果是否写回原对象
         Rigidbody a(RigidbodyHandle::FromId(0));
         Collider ca, cs;
-        std::vector<CollisionPair> pairs;
+        std::vector<CollisionSolveReq> pairs;
         buildPairs(a, ca, cs, Vector2(1, 0), pairs);
         PhySolver solver(4);
         solver.SolveStep(pairs, 1.0f / 60.0f);

@@ -2,7 +2,7 @@
 #include "Solver/SolverPair.h"
 #include "Solver/SolverRigidbody.h"
 #include "Solver/IslandDivider.h"
-#include "Collision/CollisionPair.h"
+#include "Collision/CollisionSolveReq.h"
 #include "Object/Object.h"
 #include <unordered_map>
 #include <vector>
@@ -24,14 +24,14 @@ namespace Core::Solver
         PhySolver(int iteration) : _iteration(iteration),_islandDivider(IslandDivider()) {}
         ~PhySolver();
 
-        void SolveStep(const std::vector<Collision::CollisionPair>& pairs, float dt);
+        void SolveStep(const std::vector<Collision::CollisionSolveReq>& pairs, float dt);
         void Foreach(std::function<void(const RigidbodyHandle&, const SolverRigidbody* const)> func);
         void ClearTemp();
 
     private:
         SolverRigidbody* CreateSolverRigidbody(float m, float i);
         SolverRigidbody* CreateSolverRigidbody();
-        std::vector<SolverPair> CreateSolverPairs(const std::vector<Collision::CollisionPair>& pairs);
+        std::vector<SolverPair> CreateSolverPairs(const std::vector<Collision::CollisionSolveReq>& pairs);
         void ImpulseIteration(std::vector<SolverPair>& island, float step) const;
     };
 }

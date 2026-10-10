@@ -42,7 +42,7 @@ namespace Core::Solver
         for(auto& p : _staticSolverBodies)
             if(p.second) delete p.second;
     }
-    void PhySolver::SolveStep(const std::vector<Collision::CollisionPair>& pairs, float dt)
+    void PhySolver::SolveStep(const std::vector<Collision::CollisionSolveReq>& pairs, float dt)
     {
         ClearTemp();
         auto solverPairs = CreateSolverPairs(pairs);
@@ -88,7 +88,7 @@ namespace Core::Solver
         }
         return new SolverRigidbody();
     }
-    vector<SolverPair> PhySolver::CreateSolverPairs(const vector<CollisionPair>& pairs)
+    vector<SolverPair> PhySolver::CreateSolverPairs(const vector<CollisionSolveReq>& pairs)
     {
         vector<SolverPair> ans;
         for(auto& p : pairs)
