@@ -28,6 +28,29 @@ namespace Core::Math
         m12 = m21;
         m21 = temp;
     }
+    Vector2 Matrix3x3::GetPosition() const
+    {
+        return Vector2(m02, m12);
+    }
+    float Matrix3x3::GetRotate() const
+    {
+        return Atan2(m10, m00);
+    }
+    Vector2 Matrix3x3::GetScale() const
+    {
+        return Vector2
+        {
+            Sqrt(m00 * m00 + m10 * m10),
+            Sqrt(m01 * m01 + m11 * m11)
+        };
+    }
+    Matrix2x2 Matrix3x3::ToMatrix2x2() const
+    {
+        Matrix2x2 m;
+        m.m00 = m00; m.m01 = m01;
+        m.m10 = m10; m.m11 = m11;
+        return m;
+    }
 
     Matrix3x3 operator*(const Matrix3x3& a, const Matrix3x3& b)
     {
@@ -72,7 +95,7 @@ namespace Core::Math
         );
     }
 
-    Matrix3x3 GetTranslate(const Vector2& pos)
+    Matrix3x3 GetTranslateMatrix(const Vector2& pos)
     {
         Matrix3x3 T;
         T.m02 = pos.x;
@@ -80,14 +103,14 @@ namespace Core::Math
         T.m22 = 1.0f;
         return T;
     }
-    Matrix3x3 GetRotate(float rot)
+    Matrix3x3 GetRotateMatrix(float rot)
     {
         Matrix3x3 R;
         R.m00 = Cos(rot); R.m01 = -Sin(rot);
         R.m10 = Sin(rot); R.m11 = Cos(rot);
         return R;
     }
-    Matrix3x3 GetScale(const Vector2& scale)
+    Matrix3x3 GetScaleMatrix(const Vector2& scale)
     {
         Matrix3x3 S;
         S.m00 = scale.x;
@@ -96,19 +119,33 @@ namespace Core::Math
     }
     Matrix3x3 TRS(const Vector2& pos, float rot, const Vector2& scale)
     {
-        auto S = GetScale(scale);
-        auto R = GetRotate(rot);
-        auto T = GetTranslate(pos);
+        auto S = GetScaleMatrix(scale);
+        auto R = GetRotateMatrix(rot);
+        auto T = GetTranslateMatrix(pos);
         return T * R * S;
     }
     Matrix3x3 InverseTRS(const Vector2& pos, float rot, const Vector2& scale)
     {
-        auto S = GetScale(Vector2(1.0f / Max(Epsilon, scale.x), 1.0f / Max(Epsilon, scale.y)));
+        auto S = GetScaleMatrix(Vector2(1.0f / Max(Epsilon, scale.x), 1.0f / Max(Epsilon, scale.y)));
         auto R2x2 = Matrix2x2(rot);
         R2x2.TransposeSelf();
         auto R = Matrix3x3(R2x2);
-        auto T = GetTranslate(-pos);
+        auto T = GetTranslateMatrix(-pos);
         return S * R * T;
+    }
+    Matrix3x3 TR(const Vector2& pos, float rot)
+    {
+        auto R = GetRotateMatrix(rot);
+        auto T = GetTranslateMatrix(pos);
+        return T * R;
+    }
+    Matrix3x3 InverseTR(const Vector2& pos, float rot)
+    {
+        auto R2x2 = Matrix2x2(rot);
+        R2x2.TransposeSelf();
+        auto R = Matrix3x3(R2x2);
+        auto T = GetTranslateMatrix(-pos);
+        return R * T;
     }
 }
 namespace Core

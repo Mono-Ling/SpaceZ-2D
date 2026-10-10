@@ -27,6 +27,11 @@ namespace Core::Math
         Matrix3x3 Transpose() const;
         void TransposeSelf();
 
+        Vector2 GetPosition() const;
+        float GetRotate() const;
+        Vector2 GetScale() const;
+        Matrix2x2 ToMatrix2x2() const;
+
         static const Matrix3x3 identity;
     };
     Matrix3x3 operator*(const Matrix3x3& a, const Matrix3x3& b);
@@ -34,11 +39,13 @@ namespace Core::Math
     Vector2 MulPoint(const Matrix3x3& m, const Vector2& v);
     Vector2 MulVector(const Matrix3x3& m, const Vector2& v);
 
-    Matrix3x3 GetTranslate(const Vector2& pos);
-    Matrix3x3 GetRotate(float rot);
-    Matrix3x3 GetScale(const Vector2& scale);
+    Matrix3x3 GetTranslateMatrix(const Vector2& pos);
+    Matrix3x3 GetRotateMatrix(float rot);
+    Matrix3x3 GetScaleMatrix(const Vector2& scale);
     Matrix3x3 TRS(const Vector2& pos, float rot, const Vector2& scale);
     Matrix3x3 InverseTRS(const Vector2& pos, float rot, const Vector2& scale);
+    Matrix3x3 TR(const Vector2& pos, float rot);
+    Matrix3x3 InverseTR(const Vector2& pos, float rot);
 }
 namespace Core
 {
