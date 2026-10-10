@@ -2,28 +2,34 @@
 #include "Math/Vector2.h"
 #include "Object/Collider.h"
 #include "Solver/SolverRigidbody.h"
+#include <utility>
 
 namespace Core::Solver
 {
     struct SolverPair
     {
-        SolverRigidbody* first;
-        SolverRigidbody* second;
+        SolverRigidbody* first = nullptr;
+        SolverRigidbody* second = nullptr;
         
-        float staticFriction;
-        float dynamicFriction;
-        float elasticity;
+        float staticFriction = 0;
+        float dynamicFriction = 0;
+        float elasticity = 0;
 
-        float invNormalEffMass;
-        float invTangentEffMass;
-        float normalImpulse; // first -> second
-        float tangentImpulse;
+        float invNormalEffMass = 0;
+        float invTangentEffMass = 0;
+        float normalImpulse = 0; // first -> second
+        float tangentImpulse = 0;
 
-        Math::Vector2 point;
-        Math::Vector2 normal; // first -> second
+        Math::Vector2 point = Math::Vector2::zero;
+        Math::Vector2 normal = Math::Vector2::zero; // first -> second
 
-        SolverPair(const Math::Vector2& point, const Math::Vector2& normal)
-        : point(point), normal(normal.Normalized()), normalImpulse(0), tangentImpulse(0), first(nullptr), second(nullptr) {}
+        // 刚体本地坐标系下（含缩放）碰撞点
+        Math::Vector2 firstAnchorPoint = Math::Vector2::zero;
+        Math::Vector2 secondAnchorPoint = Math::Vector2::zero;
+
+        SolverPair(const Math::Vector2& point, const Math::Vector2& normal, std::pair<Math::Vector2, Math::Vector2> anchorPoint)
+        : point(point), normal(normal.Normalized()),
+          firstAnchorPoint(anchorPoint.first), secondAnchorPoint(anchorPoint.second) {}
 
         bool IsEnable() const;
         void SetRigidbody(SolverRigidbody* first, SolverRigidbody* second);
@@ -31,6 +37,8 @@ namespace Core::Solver
 
         void ApplyNormalImpulse();
         void ApplyTangentImpulse(float step);
+
+        void ApplyPositionCorrection();
     
     private:
         float GetInvEffMass(const Math::Vector2& dir) const;

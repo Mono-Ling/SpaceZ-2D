@@ -16,6 +16,10 @@ namespace Core::Collision
         Math::Vector2 point = Math::Vector2::zero;
         Math::Vector2 normal = Math::Vector2::zero; // first -> second
 
+        // 刚体本地坐标系下（含缩放）碰撞点
+        Math::Vector2 firstAnchorPoint = Math::Vector2::zero;
+        Math::Vector2 secondAnchorPoint = Math::Vector2::zero;
+
         constexpr void SetCollisionRigidbody(Rigidbody* first, Rigidbody* second)
         {
             firstBody = first;
@@ -26,11 +30,16 @@ namespace Core::Collision
             firstCollider = first;
             secondCollider = second;
         }
-        inline void SetCollisionInfo(Math::Vector2 point, Math::Vector2 normal, float depth)
+        inline void SetCollisionInfo(const Math::Vector2& p, const Math::Vector2& n, float d)
         {
-            this->point = point;
-            this->normal = normal;
-            this->depth = depth;
+            this->point = p;
+            this->normal = n;
+            this->depth = d;
+        }
+        inline void SetCollisionPoint(const Math::Vector2& first, const Math::Vector2& second)
+        {
+            firstAnchorPoint = first;
+            secondAnchorPoint = second;
         }
 
         constexpr bool IsEnable() const { return firstCollider && secondCollider; }

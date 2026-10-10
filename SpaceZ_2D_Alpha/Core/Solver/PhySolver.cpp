@@ -96,7 +96,7 @@ namespace Core::Solver
             if(!p.IsEnable())
                 continue;
 
-            SolverPair solverPair(p.point, p.normal);
+            SolverPair solverPair(p.point, p.normal, {p.firstAnchorPoint, p.secondAnchorPoint});
             SolverRigidbody* a = nullptr;
             SolverRigidbody* b = nullptr;
 
@@ -169,5 +169,8 @@ namespace Core::Solver
                 p.ApplyNormalImpulse();
                 p.ApplyTangentImpulse(step);
             }
+        for(int i = 0; i < _iteration; i++)
+            for(auto& p : island)
+                p.ApplyPositionCorrection();
     }
 }

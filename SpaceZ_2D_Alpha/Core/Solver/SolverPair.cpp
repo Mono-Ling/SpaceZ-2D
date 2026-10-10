@@ -1,6 +1,8 @@
 #include "Solver/SolverPair.h"
 #include "Math/Math.h"
+#include "Solver/PhyQuantities.h"
 using namespace Core::Math;
+using namespace Core::Solver::PhyQuantities;
 
 namespace Core::Solver
 {
@@ -92,6 +94,26 @@ namespace Core::Solver
 
         first->ApplyImpulseMoment(Cross(rA, -tP));
         second->ApplyImpulseMoment(Cross(rB, tP));
+    }
+    void SolverPair::ApplyPositionCorrection()
+    {
+        if(!first || !second)
+            return;
+        auto worldA = first->PointLocalToWorld(firstAnchorPoint);
+        auto worldB = second->PointLocalToWorld(secondAnchorPoint);
+
+        auto rA = worldA - first->position;
+        auto rB = worldB - second->position;
+
+        float depth = Dot(worldA - worldB, normal);
+        float d = Clamp(depth - PENETRATE_SLOP, 0.0f, MAX_POS_CORRECTION);
+        auto p = RELAXATION * d / Max(Epsilon, invNormalEffMass) * normal;
+
+        first->ApplyPositionImpulse(-p);
+        second->ApplyPositionImpulse(p);
+
+        first->ApplyAngleImpulse(Cross(rA, -p));
+        second->ApplyAngleImpulse(Cross(rB, p));
     }
 
     float SolverPair::GetInvEffMass(const Math::Vector2& dir) const

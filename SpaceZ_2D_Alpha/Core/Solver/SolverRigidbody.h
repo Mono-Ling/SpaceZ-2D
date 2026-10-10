@@ -24,5 +24,10 @@ namespace Core::Solver
         Math::Vector2 GetRealVelocity(const Math::Vector2& r) const;
         void ApplyImpulse(const Math::Vector2& p);
         void ApplyImpulseMoment(float m);
+
+        void ApplyPositionImpulse(const Math::Vector2& p);
+        void ApplyAngleImpulse(float m);
+
+        Math::Vector2 PointLocalToWorld(const Math::Vector2& point);
     };
 }

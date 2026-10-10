@@ -2,20 +2,24 @@
 // 物理求解器回归测试：只依赖 Core + 控制台，不需要 Unity。
 // 构建：tools/build_tests.bat   ->  Tests/Debug/SpaceZ_SolverTests.exe
 //
-// 覆盖三层：
+// 覆盖五层：
 //   A. SolverPair 冲量算式（单元级，绕开容器）
 //   B. PhySolver 集成（SolveStep + Foreach）
 //   C. IslandDivider 并查集分岛
 //   D. 边界输入与已知缺口
+//   E. 位置修正 ApplyPositionCorrection（本轮改动的回归位）
 // 标记约定：[PASS] 通过 / [FAIL] 回归（影响退出码）/ [KNOWN] 已知未修复（不影响退出码）
 //
 // !! 构造被测对象时的强制约定 !!
 //   SolverRigidbody 只有 `SolverRigidbody()`（仅置 invMass/invInertia=0）和
 //   `SolverRigidbody(m, i)`，**angle / position / linearVelocity / angularVelocity 都没有
-//   默认初始化**；SolverPair 的 staticFriction / dynamicFriction / elasticity /
-//   invNormalEffMass / invTangentEffMass 同样没有。
-//   所以测试里一律走 MakeBody / MakeStatic / Contact 三个助手，绝不裸构造后只赋一部分字段
-//   —— 否则读到的是栈上的垃圾值，测试会随栈内容随机通过/失败（实测踩过）。
+//   默认初始化**。所以测试里一律走 MakeBody / MakeStatic / Contact 三个助手，
+//   绝不裸构造后只赋一部分字段 —— 否则读到的是栈上的垃圾值，测试会随机通过/失败。
+//
+// !! 本轮 API 变化 !!
+//   SolverPair 构造函数由 (point, normal) 变为
+//   (point, normal, std::pair<Vector2,Vector2>{anchorA, anchorB})，
+//   CollisionPair 新增 SetCollisionPoint(anchorA, anchorB)。
 
 #include "Solver/PhySolver.h"
 #include "Solver/IslandDivider.h"
@@ -65,6 +69,12 @@ static SolverRigidbody MakeStatic(Vector2 pos)
     b.position = pos; b.linearVelocity = Vector2::zero; b.angle = 0.0f; b.angularVelocity = 0.0f;
     return b;
 }
+// 以 (point, normal) 构造碰撞对（anchor 默认取零向量）
+static SolverPair MakeSolverPair(Vector2 point, Vector2 normal,
+                                 Vector2 anchorA = Vector2::zero, Vector2 anchorB = Vector2::zero)
+{
+    return SolverPair(point, normal, {anchorA, anchorB});
+}
 // 设置接触材质（等价于走 PhySolver 时的 SetContact 路径）
 static void Contact(SolverPair& p, float sf, float df, float e)
 {
@@ -101,7 +111,7 @@ static void TestNormalImpulse()
     {   // 等质量正碰、完全非弹性：共同速度 = 0.5
         SolverRigidbody a = MakeBody(1, 1, Vector2(0, 0), Vector2(1, 0), 0);
         SolverRigidbody b = MakeBody(1, 1, Vector2(1, 0), Vector2::zero, 0);
-        SolverPair p(Vector2(0.5f, 0), Vector2(1, 0));
+        SolverPair p = MakeSolverPair(Vector2(0.5f, 0), Vector2(1, 0));
         MakePair(p, a, b, Vector2(1, 0), Vector2(0.5f, 0));
         Contact(p, 0.5f, 0.5f, 0.0f);
         p.ApplyNormalImpulse();
@@ -112,7 +122,7 @@ static void TestNormalImpulse()
     {   // 弹性 e=1：等质量下速度互换
         SolverRigidbody a = MakeBody(1, 1, Vector2(0, 0), Vector2(1, 0), 0);
         SolverRigidbody b = MakeBody(1, 1, Vector2(1, 0), Vector2::zero, 0);
-        SolverPair p(Vector2(0.5f, 0), Vector2(1, 0));
+        SolverPair p = MakeSolverPair(Vector2(0.5f, 0), Vector2(1, 0));
         MakePair(p, a, b, Vector2(1, 0), Vector2(0.5f, 0));
         Contact(p, 0.5f, 0.5f, 1.0f);
         p.ApplyNormalImpulse();
@@ -122,7 +132,7 @@ static void TestNormalImpulse()
     {   // 撞静态体
         SolverRigidbody a = MakeBody(1, 1, Vector2(0, 0), Vector2(1, 0), 0);
         SolverRigidbody s = MakeStatic(Vector2(1, 0));
-        SolverPair p(Vector2(0.5f, 0), Vector2(1, 0));
+        SolverPair p = MakeSolverPair(Vector2(0.5f, 0), Vector2(1, 0));
         MakePair(p, a, s, Vector2(1, 0), Vector2(0.5f, 0));
         Contact(p, 0.5f, 0.5f, 0.0f);
         p.ApplyNormalImpulse();
@@ -132,7 +142,7 @@ static void TestNormalImpulse()
     {   // 已在分离：不应产生冲量
         SolverRigidbody a = MakeBody(1, 1, Vector2(0, 0), Vector2(-1, 0), 0);
         SolverRigidbody b = MakeBody(1, 1, Vector2(1, 0), Vector2::zero, 0);
-        SolverPair p(Vector2(0.5f, 0), Vector2(1, 0));
+        SolverPair p = MakeSolverPair(Vector2(0.5f, 0), Vector2(1, 0));
         MakePair(p, a, b, Vector2(1, 0), Vector2(0.5f, 0));
         Contact(p, 0.5f, 0.5f, 0.0f);
         p.ApplyNormalImpulse();
@@ -142,7 +152,7 @@ static void TestNormalImpulse()
     {   // 偏心接触的解析解：crossA = -0.5, invEffM = 1.25, Jn = 0.8
         SolverRigidbody a = MakeBody(1, 1, Vector2(0, 0), Vector2(1, 0), 0);
         SolverRigidbody s = MakeStatic(Vector2(0.5f, 0.5f));
-        SolverPair p(Vector2(0.5f, 0.5f), Vector2(1, 0));
+        SolverPair p = MakeSolverPair(Vector2(0.5f, 0.5f), Vector2(1, 0));
         MakePair(p, a, s, Vector2(1, 0), Vector2(0.5f, 0.5f));
         Contact(p, 0.5f, 0.5f, 0.0f);
         p.ApplyNormalImpulse();
@@ -159,7 +169,7 @@ static float FrictionResidualX(float vx, float mu)
 {
     SolverRigidbody a = MakeBody(1, 1, Vector2(0, 0), Vector2(vx, 0.5f), 0);
     SolverRigidbody s = MakeStatic(Vector2(0, 1));
-    SolverPair p(Vector2(0, 0), Vector2(0, 1));
+    SolverPair p = MakeSolverPair(Vector2(0, 0), Vector2(0, 1));
     MakePair(p, a, s, Vector2(0, 1), Vector2(0, 0));
     Contact(p, mu, mu, 0.0f);
     p.ApplyNormalImpulse();                 // 先得到 normalImpulse = 0.5
@@ -169,7 +179,7 @@ static float FrictionResidualX(float vx, float mu)
 
 static void TestFrictionImpulse()
 {
-    Section("A2 摩擦冲量（单元级）—— 本次修复的回归位");
+    Section("A2 摩擦冲量（单元级）—— 既修复的回归位");
 
     Ok(Near(FrictionResidualX(0.5f, 0.0f), 0.5f),
        "mu=0 -> 完全不减切向速度（0.5 保持 0.5）");
@@ -188,7 +198,7 @@ static void TestFrictionImpulse()
     {   // 直接核对恒等式：施加量 == min(|tP|, mu*Jn)
         SolverRigidbody a = MakeBody(1, 1, Vector2(0, 0), Vector2(1.0f, 0.5f), 0);
         SolverRigidbody s = MakeStatic(Vector2(0, 1));
-        SolverPair p(Vector2(0, 0), Vector2(0, 1));
+        SolverPair p = MakeSolverPair(Vector2(0, 0), Vector2(0, 1));
         MakePair(p, a, s, Vector2(0, 1), Vector2(0, 0));
         Contact(p, 0.5f, 0.5f, 0.0f);
         p.ApplyNormalImpulse();
@@ -201,7 +211,7 @@ static void TestFrictionImpulse()
     {   // 多轮迭代：法向冲量若被覆盖而非累计，第 2 轮摩擦预算会归零
         SolverRigidbody a = MakeBody(1, 1, Vector2(0, 0), Vector2(1.0f, 0.5f), 0);
         SolverRigidbody s = MakeStatic(Vector2(0, 1));
-        SolverPair p(Vector2(0, 0), Vector2(0, 1));
+        SolverPair p = MakeSolverPair(Vector2(0, 0), Vector2(0, 1));
         MakePair(p, a, s, Vector2(0, 1), Vector2(0, 0));
         Contact(p, 0.5f, 0.5f, 0.0f);
         p.ApplyNormalImpulse();
@@ -212,7 +222,6 @@ static void TestFrictionImpulse()
     }
 }
 
-// ---------------------------------------------------------------- B1 集成
 // ---------------------------------------------------------------- A3 多轮迭代
 // 引擎默认 _iteration=4，而 A2 的每个用例只跑了「单轮」。本节点补上多轮：摩擦
 // 削减量必须与迭代轮数无关（既不过制动、也不被回推抵消）。
@@ -220,7 +229,7 @@ static float FrictionResidualXN(float vx, float mu, int N)
 {
     SolverRigidbody a = MakeBody(1, 1, Vector2(0, 0), Vector2(vx, 0.5f), 0);
     SolverRigidbody s = MakeStatic(Vector2(0, 1));
-    SolverPair p(Vector2(0, 0), Vector2(0, 1));
+    SolverPair p = MakeSolverPair(Vector2(0, 0), Vector2(0, 1));
     MakePair(p, a, s, Vector2(0, 1), Vector2(0, 0));
     Contact(p, mu, mu, 0.0f);
     for (int i = 0; i < N; ++i)
@@ -243,7 +252,7 @@ static void TestFrictionIterationInvariance()
     {   // 法向冲量跨轮累积：既不归零、也不膨胀
         SolverRigidbody a = MakeBody(1, 1, Vector2(0, 0), Vector2(1.0f, 0.5f), 0);
         SolverRigidbody s = MakeStatic(Vector2(0, 1));
-        SolverPair p(Vector2(0, 0), Vector2(0, 1));
+        SolverPair p = MakeSolverPair(Vector2(0, 0), Vector2(0, 1));
         MakePair(p, a, s, Vector2(0, 1), Vector2(0, 0));
         Contact(p, 0.5f, 0.5f, 0.0f);
         for (int i = 0; i < 50; ++i) p.ApplyNormalImpulse();
@@ -354,9 +363,9 @@ static void TestIslandDivider()
     SolverRigidbody sc = MakeBody(1, 1, Vector2(2, 0), Vector2::zero, 0);
     SolverRigidbody sd = MakeBody(1, 1, Vector2(3, 0), Vector2::zero, 0);
 
-    SolverPair pab(Vector2(0.5f, 0),  Vector2(1, 0)); pab.SetRigidbody(&sa, &sb);
-    SolverPair pbc(Vector2(1.5f, 0),  Vector2(1, 0)); pbc.SetRigidbody(&sb, &sc);
-    SolverPair pcd(Vector2(10.5f, 0), Vector2(1, 0)); pcd.SetRigidbody(&sc, &sd);
+    SolverPair pab = MakeSolverPair(Vector2(0.5f, 0),  Vector2(1, 0)); pab.SetRigidbody(&sa, &sb);
+    SolverPair pbc = MakeSolverPair(Vector2(1.5f, 0),  Vector2(1, 0)); pbc.SetRigidbody(&sb, &sc);
+    SolverPair pcd = MakeSolverPair(Vector2(10.5f, 0), Vector2(1, 0)); pcd.SetRigidbody(&sc, &sd);
 
     IslandDivider divider;
     Ok(divider.IslandDivision({pab, pcd}).size() == 2,      "两组互不相连 -> 2 个岛");
@@ -364,6 +373,143 @@ static void TestIslandDivider()
     Ok(divider.IslandDivision({pab, pbc, pcd}).size() == 1, "链式 A-B, B-C, C-D -> 1 个岛");
     Ok(divider.IslandDivision({pab}).size() == 1,           "单个碰撞对 -> 1 个岛");
     Ok(divider.IslandDivision({}).size() == 0,              "空输入 -> 0 个岛");
+}
+
+// ---------------------------------------------------------------- E 位置修正
+// 本轮改动新增 SolverPair::ApplyPositionCorrection()：
+//   worldA = first.PointLocalToWorld(firstAnchorPoint)      （本地锚点 -> 世界）
+//   worldB = second.PointLocalToWorld(secondAnchorPoint)
+//   depth  = Dot(worldA - worldB, normal)                   （>0 表示重叠）
+//   d      = Clamp(depth - PENETRATE_SLOP, 0, MAX_POS_CORRECTION)
+//   p      = RELAXATION * d / invNormalEffMass * normal
+//   first.position  -= invMass * p ; second.position += invMass * p
+//   angle += invInertia * Cross(r, ∓p)
+// 常量：RELAXATION=0.2  MAX_POS_CORRECTION=0.2  PENETRATE_SLOP=0.005
+//
+// 统一场景：a 为动体(mass=1,inertia=1) 置于原点、s 为静态体，normal=(1,0)，
+// 接触点取在原点 => crossA = 0 => invNormalEffMass = 1，于是 p = 0.2 * d。
+static SolverPair MakePosPair(SolverRigidbody& a, SolverRigidbody& b,
+                              Vector2 normal, Vector2 contactPoint,
+                              Vector2 anchorA, Vector2 anchorB)
+{
+    SolverPair p(contactPoint, normal, {anchorA, anchorB});
+    p.point = contactPoint;
+    p.normal = normal.Normalized();
+    p.SetRigidbody(&a, &b);
+    return p;
+}
+
+static void TestPositionCorrection()
+{
+    Section("E1 位置修正（单元级）—— 本轮改动的回归位");
+
+    {   // 解析解：depth = 0.105 -> d = 0.1 -> p = 0.02 -> 动体 x = -0.02
+        SolverRigidbody a = MakeBody(1, 1, Vector2(0, 0), Vector2::zero, 0);
+        SolverRigidbody s = MakeStatic(Vector2(0, 0));
+        SolverPair p = MakePosPair(a, s, Vector2(1, 0), Vector2(0, 0),
+                                   Vector2(0.605f, 0), Vector2(0.5f, 0));
+        Ok(Near(p.invNormalEffMass, 1.0f), "有效质量倒数 == 1（动体 m=1，静态体 0）");
+        p.ApplyPositionCorrection();
+        Ok(Near(a.position.x, -0.02f, 1e-5f), "depth=0.105 -> 动体被推开 0.02（解析解）");
+        Ok(Near(a.position.y, 0.0f), "沿法线方向 -> 切向不动");
+        Ok(Near(a.angle, 0.0f), "锚点在 x 轴上 -> 无力矩");
+        Ok(Near(s.position.x, 0.0f), "静态体 invMass=0 -> 位置不变");
+    }
+    {   // 深度小于允许穿透：不产生任何修正
+        SolverRigidbody a = MakeBody(1, 1, Vector2(0, 0), Vector2::zero, 0);
+        SolverRigidbody s = MakeStatic(Vector2(0, 0));
+        SolverPair p = MakePosPair(a, s, Vector2(1, 0), Vector2(0, 0),
+                                   Vector2(0.503f, 0), Vector2(0.5f, 0));
+        p.ApplyPositionCorrection();
+        Ok(Near(a.position.x, 0.0f), "depth=0.003 < slop 0.005 -> 完全不动");
+    }
+    {   // 深度超过单轮上限：被 MAX_POS_CORRECTION 截断
+        SolverRigidbody a = MakeBody(1, 1, Vector2(0, 0), Vector2::zero, 0);
+        SolverRigidbody s = MakeStatic(Vector2(0, 0));
+        SolverPair p = MakePosPair(a, s, Vector2(1, 0), Vector2(0, 0),
+                                   Vector2(1.505f, 0), Vector2(0.5f, 0));
+        p.ApplyPositionCorrection();
+        Ok(Near(a.position.x, -0.04f, 1e-5f),
+           "depth=1.005 -> 单轮修正被截到 MAX_POS_CORRECTION=0.2 -> 位移 0.04");
+    }
+    {   // 分离中的物体（depth < 0）：不得被拉近
+        SolverRigidbody a = MakeBody(1, 1, Vector2(0, 0), Vector2::zero, 0);
+        SolverRigidbody s = MakeStatic(Vector2(1, 0));
+        SolverPair p = MakePosPair(a, s, Vector2(1, 0), Vector2(0.5f, 0),
+                                   Vector2::zero, Vector2::zero);
+        p.ApplyPositionCorrection();
+        Ok(Near(a.position.x, 0.0f), "已分离（depth = -1）-> 不被误修正");
+    }
+    {   // 角度修正：锚点偏离质心连线 -> Cross(rA, -p) 产生力矩
+        SolverRigidbody a = MakeBody(1, 1, Vector2(0, 0), Vector2::zero, 0);
+        SolverRigidbody s = MakeStatic(Vector2(0, 0));
+        SolverPair p = MakePosPair(a, s, Vector2(1, 0), Vector2(0, 0),
+                                   Vector2(0.605f, 0.5f), Vector2(0.5f, 0));
+        p.ApplyPositionCorrection();
+        // rA = (0.605, 0.5)，p = (0.02, 0) -> angle += invInertia * (0.5 * 0.02) = 0.01
+        Ok(Near(a.angle, 0.01f, 1e-5f), "锚点偏离连线 -> 角度修正 0.01（Cross(rA,-p)/I）");
+        Ok(Near(a.position.x, -0.02f, 1e-5f), "角度修正不影响平移量");
+    }
+    {   // 多轮弛豫：每轮吃掉剩余深度的 20%，收敛到 slop 且不越过
+        SolverRigidbody a = MakeBody(1, 1, Vector2(0, 0), Vector2::zero, 0);
+        SolverRigidbody s = MakeStatic(Vector2(0, 0));
+        SolverPair p = MakePosPair(a, s, Vector2(1, 0), Vector2(0, 0),
+                                   Vector2(0.605f, 0), Vector2(0.5f, 0));
+        bool monotonic = true;
+        float prev = a.position.x;
+        for (int i = 0; i < 60; ++i)
+        {
+            p.ApplyPositionCorrection();
+            if (a.position.x > prev + 1e-6f) monotonic = false;
+            prev = a.position.x;
+        }
+        float depth = (a.position.x + 0.605f) - 0.5f;
+        Ok(monotonic, "60 轮弛豫单调推进（不来回振荡）");
+        Ok(Near(depth, 0.005f, 1e-3f), "收敛到允许穿透 PENETRATE_SLOP=0.005");
+    }
+    {   // 反复施加不产生非有限值
+        SolverRigidbody a = MakeBody(1, 1, Vector2(0, 0), Vector2::zero, 0);
+        SolverRigidbody s = MakeStatic(Vector2(0, 0));
+        SolverPair p = MakePosPair(a, s, Vector2(1, 0), Vector2(0, 0),
+                                   Vector2(100.0f, 0), Vector2(0.5f, 0));
+        for (int i = 0; i < 200; ++i) p.ApplyPositionCorrection();
+        Ok(std::isfinite(a.position.x) && std::isfinite(a.angle),
+           "极大穿透 200 轮 -> 位置/角度保持有限值");
+    }
+}
+
+// ---------------------------------------------------------------- E2 集成
+static void TestPositionCorrectionIntegration()
+{
+    Section("E2 位置修正（PhySolver 集成）");
+
+    Rigidbody a(RigidbodyHandle::FromId(0));
+    InitBody(a, 1, 1, Vector2(0, 0), Vector2::zero, 0);
+    Collider ca, cs;
+    InitCol(ca, 0.5f, 0.5f, 0.0f, a.position); ca.SetBody(a.Handle());
+    InitCol(cs, 0.5f, 0.5f, 0.0f, Vector2(0, 0));       // 静态体
+
+    CollisionPair cp;
+    cp.SetCollisionRigidbody(&a, nullptr); cp.SetCollisionCollider(&ca, &cs);
+    cp.SetCollisionInfo(Vector2(0, 0), Vector2(1, 0), 0.5f);
+    cp.SetCollisionPoint(Vector2(0.605f, 0), Vector2(0.5f, 0));
+    std::vector<CollisionPair> pairs{cp};
+
+    PhySolver solver(4);
+    solver.SolveStep(pairs, 1.0f / 60.0f);
+
+    // depth0 = 0.105 -> e0 = 0.1，4 轮后 e = 0.1 * 0.8^4 = 0.04096
+    // 位移 = -(0.1 - 0.04096) = -0.05904
+    bool checked = false;
+    solver.Foreach([&](const RigidbodyHandle&, const SolverRigidbody* const s) {
+        checked = true;
+        Ok(Near(s->position.x, -0.05904f, 1e-3f),
+           "SolveStep 4 轮位置修正 -> 求解体 x = -0.05904（弛豫收敛解析解）");
+    });
+    Ok(checked, "Foreach 能取到求解体（位置修正未破坏对象池）");
+
+    // 结果是否写回原 Rigidbody
+    Known(Near(a.position.x, -0.05904f, 1e-3f), "SolveStep 把位置修正写回原 Rigidbody");
 }
 
 // ---------------------------------------------------------------- D 边界 / 已知缺口
@@ -388,7 +534,7 @@ static void TestEdgeCases()
         bool finite = true;
         solver.Foreach([&](const RigidbodyHandle&, const SolverRigidbody* const s) {
             if (!std::isfinite(s->linearVelocity.x) || !std::isfinite(s->linearVelocity.y)
-                || !std::isfinite(s->angularVelocity)) finite = false;
+                || !std::isfinite(s->angularVelocity) || !std::isfinite(s->position.x)) finite = false;
         });
         return finite;
     };
@@ -398,7 +544,7 @@ static void TestEdgeCases()
         Collider ca, cs;
         std::vector<CollisionPair> pairs;
         buildPairs(a, ca, cs, Vector2(0, 0), pairs);
-        Ok(finiteAfter(pairs, 1.0f / 60.0f), "零长度法线 -> 速度保持有限值");
+        Ok(finiteAfter(pairs, 1.0f / 60.0f), "零长度法线 -> 速度/位置保持有限值");
     }
     {   // dt = 0
         Rigidbody a(RigidbodyHandle::FromId(0));
@@ -414,7 +560,7 @@ static void TestEdgeCases()
         buildPairs(a, ca, cs, Vector2(1, 0), pairs);
         PhySolver solver(4);
         solver.SolveStep(pairs, 1.0f / 60.0f);
-        Known(Near(a.linearVelocity.x, 0.0f), "SolveStep 把结果写回原 Rigidbody");
+        Known(Near(a.linearVelocity.x, 0.0f), "SolveStep 把速度结果写回原 Rigidbody");
     }
 }
 
@@ -428,6 +574,8 @@ int main()
     TestSolverIntegration();
     TestSolverContinuity();
     TestIslandDivider();
+    TestPositionCorrection();
+    TestPositionCorrectionIntegration();
     TestEdgeCases();
 
     printf("\n----------------------------------------\n");
