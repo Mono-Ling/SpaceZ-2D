@@ -8,6 +8,7 @@ namespace Core::Collision
         Math::Vector2 center = Math::Vector2::zero;
         Math::Vector2 extents = Math::Vector2::one;
 
+        Bound() = default;
         Bound(const Math::Vector2& center, const Math::Vector2& extents);
 
         Math::Vector2 Max() const;
