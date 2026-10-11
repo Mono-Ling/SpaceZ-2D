@@ -1,6 +1,7 @@
 #pragma once
 #include "CollisionDetection/Geometry/Bound.h"
 #include "CollisionDetection/BVH/BVHNodeObj.h"
+#include "Math/Math.h"
 #include <cfloat>
 
 namespace Core::Collision
@@ -9,32 +10,35 @@ namespace Core::Collision
     {
     public:
         static constexpr float MULTIPLE = 1.5f;
+        int height;
         BVHNode* left = nullptr;
         BVHNode* right = nullptr;
         BVHNode* parent = nullptr;
         Bound bound;
         BVHNodeObj obj = BVHNodeObj::null;
 
-        BVHNode(const Bound& bound) : bound(bound) {}
+        BVHNode(const Bound& bound) : bound(bound), height(2) {}
         BVHNode(const BVHNodeObj& obj)
-        : bound(Bound(obj.bound.center, obj.bound.extents * MULTIPLE)), obj(obj) {}
+        : bound(Bound(obj.bound.center, obj.bound.extents * MULTIPLE)), obj(obj), height(1) {}
 
         inline bool IsLeaf() const
         {
             return obj != BVHNodeObj::null
                 && !left && !right;
         }
-        inline void UpdateSelfBound()
+        inline void UpdateSelf()
         {
-            if(left && right)
-                bound = left->bound + right->bound;
+            if(!left || !right)
+                return;
+            bound = left->bound + right->bound;
+            height = Math::Max(left->height, right->height) + 1;
         }
-        inline void UpdateBound()
+        inline void Update()
         {
             auto curr = this;
             while (curr)
             {
-                curr->UpdateSelfBound();
+                curr->UpdateSelf();
                 curr = curr->parent;
             }
         }
@@ -49,7 +53,7 @@ namespace Core::Collision
     {
         return IsIntersect(a.bound, b.bound);
     }
-    inline float MergeCost(BVHNode* node, const Bound& bound)
+    inline float DeltaArea(BVHNode* node, const Bound& bound)
     {
         if(!node)
             return FLT_MAX;

@@ -124,7 +124,7 @@ namespace Core::Collision
         }
         auto bro = GetBestBro(node->bound);
         MergeNode(bro, node);
-        node->UpdateBound();
+        node->Update();
     }
     void BVHTree::RemoveLeafNode(BVHNode* node)
     {
@@ -168,18 +168,21 @@ namespace Core::Collision
         delete parent;
 
         bro->parent = grandParent;
-        bro->UpdateBound();
+        bro->Update();
     }
     BVHNode* BVHTree::GetBestBro(const Bound& after)
     {
         if(!_root)
             return nullptr;
+        float rootArea = _root->bound.Area();
         auto node = _root;
-        float currCost = MergeCost(_root, after);
+        float currCost = DeltaArea(_root, after) / rootArea + _root->height * HEIGHT_COST_WEIGHT;
         while (node)
         {
-            float leftCost = MergeCost(node->left, after);
-            float rightCost = MergeCost(node->right, after);
+            if(node->IsLeaf())
+                break;
+            float leftCost = DeltaArea(node->left, after) / rootArea + node->left->height * HEIGHT_COST_WEIGHT;
+            float rightCost = DeltaArea(node->right, after) / rootArea + node->right->height * HEIGHT_COST_WEIGHT;
             if(currCost < leftCost && currCost < rightCost)
                 break;
             if(leftCost < rightCost)

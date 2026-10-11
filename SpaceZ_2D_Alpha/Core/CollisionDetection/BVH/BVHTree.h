@@ -8,6 +8,7 @@ namespace Core::Collision
     class BVHTree
     {
     private:
+        static constexpr float HEIGHT_COST_WEIGHT = 0.005f;
         BVHNode* _root = nullptr;
         std::unordered_map<ColliderHandle, BVHNode*> _nodeMap;
 
