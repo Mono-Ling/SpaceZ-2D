@@ -1,6 +1,7 @@
 #pragma once
 #include "Object/Object.h"
 #include "CollisionDetection/Geometry/Bound.h"
+#include "Collision/CollisionPair.h"
 
 namespace Core::Collision
 {
@@ -29,5 +30,9 @@ namespace Core::Collision
         if(a.handle == b.handle || a.body == b.body)
             return false;
         return IsIntersect(a.bound, b.bound);
+    }
+    inline CollisionPair GetCollisionPair(const BVHNodeObj& a, const BVHNodeObj& b)
+    {
+        return CollisionPair({a.handle, a.body}, {b.handle, b.body});
     }
 }

@@ -24,12 +24,10 @@ namespace Core::Solver
         Math::Vector2 normal = Math::Vector2::zero; // first -> second
 
         // 刚体本地坐标系下（含缩放）碰撞点
-        Math::Vector2 firstAnchorPoint = Math::Vector2::zero;
-        Math::Vector2 secondAnchorPoint = Math::Vector2::zero;
+        std::pair<Math::Vector2, Math::Vector2> anchorPoint;
 
         SolverPair(const Math::Vector2& point, const Math::Vector2& normal, std::pair<Math::Vector2, Math::Vector2> anchorPoint)
-        : point(point), normal(normal.Normalized()),
-          firstAnchorPoint(anchorPoint.first), secondAnchorPoint(anchorPoint.second) {}
+        : point(point), normal(normal.Normalized()), anchorPoint(anchorPoint) {}
 
         bool IsEnable() const;
         void SetRigidbody(SolverRigidbody* first, SolverRigidbody* second);

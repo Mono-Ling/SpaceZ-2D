@@ -1,6 +1,7 @@
 #pragma once
 #include "Object/Object.h"
 #include "Math/Vector2.h"
+#include <utility>
 
 namespace Core::Collision
 {
@@ -17,19 +18,13 @@ namespace Core::Collision
         Math::Vector2 normal = Math::Vector2::zero; // first -> second
 
         // 刚体本地坐标系下（含缩放）碰撞点
-        Math::Vector2 firstAnchorPoint = Math::Vector2::zero;
-        Math::Vector2 secondAnchorPoint = Math::Vector2::zero;
+        std::pair<Math::Vector2, Math::Vector2> anchorPoint;
 
         inline void SetCollisionInfo(const Math::Vector2& p, const Math::Vector2& n, float d)
         {
             this->point = p;
             this->normal = n;
             this->depth = d;
-        }
-        inline void SetCollisionPoint(const Math::Vector2& first, const Math::Vector2& second)
-        {
-            firstAnchorPoint = first;
-            secondAnchorPoint = second;
         }
 
         constexpr bool IsEnable() const { return firstCollider && secondCollider; }

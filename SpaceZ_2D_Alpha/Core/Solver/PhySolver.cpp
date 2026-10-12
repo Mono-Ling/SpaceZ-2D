@@ -96,7 +96,7 @@ namespace Core::Solver
             if(!p.IsEnable())
                 continue;
 
-            SolverPair solverPair(p.point, p.normal, {p.firstAnchorPoint, p.secondAnchorPoint});
+            SolverPair solverPair(p.point, p.normal, p.anchorPoint);
             SolverRigidbody* a = nullptr;
             SolverRigidbody* b = nullptr;
 

@@ -99,8 +99,8 @@ namespace Core::Solver
     {
         if(!first || !second)
             return;
-        auto worldA = first->PointLocalToWorld(firstAnchorPoint);
-        auto worldB = second->PointLocalToWorld(secondAnchorPoint);
+        auto worldA = first->PointLocalToWorld(anchorPoint.first);
+        auto worldB = second->PointLocalToWorld(anchorPoint.second);
 
         auto rA = worldA - first->position;
         auto rB = worldB - second->position;

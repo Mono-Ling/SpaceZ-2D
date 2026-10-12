@@ -16,10 +16,14 @@
 //   默认初始化**。所以测试里一律走 MakeBody / MakeStatic / Contact 三个助手，
 //   绝不裸构造后只赋一部分字段 —— 否则读到的是栈上的垃圾值，测试会随机通过/失败。
 //
-// !! 本轮 API 变化 !!
-//   SolverPair 构造函数由 (point, normal) 变为
-//   (point, normal, std::pair<Vector2,Vector2>{anchorA, anchorB})，
-//   CollisionPair 新增 SetCollisionPoint(anchorA, anchorB)。
+// !! 与当前 Core API 的对齐说明 !!
+//   SolverPair 构造函数：(point, normal, std::pair<Vector2,Vector2>{anchorA, anchorB})。
+//   求解器输入结构名为 CollisionSolveReq（原 CollisionPair，已改名），
+//   它没有 SetCollisionRigidbody / SetCollisionCollider / SetCollisionPoint 入口，
+//   四个指针与锚点一律直接写 public 成员：
+//     cp.firstBody / cp.secondBody / cp.firstCollider / cp.secondCollider
+//     cp.anchorPoint = { anchorA, anchorB };
+//   Collider 没有默认构造，必须带句柄：Collider c(ColliderHandle::FromId(n));
 
 #include "Solver/PhySolver.h"
 #include "Solver/IslandDivider.h"
@@ -27,7 +31,7 @@
 #include "Solver/SolverRigidbody.h"
 #include "Object/Rigidbody.h"
 #include "Object/Collider.h"
-#include "Collision/CollisionPair.h"
+#include "Collision/CollisionSolveReq.h"
 #include "Math/Vector2.h"
 #include "Math/Math.h"
 
@@ -78,10 +82,12 @@ static SolverPair MakeSolverPair(Vector2 point, Vector2 normal,
 // 设置接触材质（等价于走 PhySolver 时的 SetContact 路径）
 static void Contact(SolverPair& p, float sf, float df, float e)
 {
-    Collider ca, cb;
+    Collider ca(ColliderHandle::FromId(0));
+    Collider cb(ColliderHandle::FromId(1));
     ca.staticFriction = sf; ca.dynamicFriction = df; ca.elasticity = e;
     ca.angle = 0.0f; ca.position = Vector2::zero;
-    cb = ca;
+    cb.staticFriction = sf; cb.dynamicFriction = df; cb.elasticity = e;
+    cb.angle = 0.0f; cb.position = Vector2::zero;
     p.SetContact(ca, cb);
 }
 // point / normal 定好之后再算有效质量（SetRigidbody 内部按当前 point/normal 计算）
@@ -274,11 +280,12 @@ static void TestSolverIntegration()
         Rigidbody a(RigidbodyHandle::FromId(0)), b(RigidbodyHandle::FromId(1));
         InitBody(a, 1, 1, Vector2(0, 0), Vector2(1, 0), 0);
         InitBody(b, 1, 1, Vector2(1, 0), Vector2::zero, 0);
-        Collider ca, cb;
+        Collider ca(ColliderHandle::FromId(0)), cb(ColliderHandle::FromId(1));
         InitCol(ca, 0.5f, 0.5f, 0.0f, a.position); ca.SetBody(a.Handle());
         InitCol(cb, 0.5f, 0.5f, 0.0f, b.position); cb.SetBody(b.Handle());
         CollisionSolveReq cp;
-        cp.SetCollisionRigidbody(&a, &b); cp.SetCollisionCollider(&ca, &cb);
+        cp.firstBody = &a; cp.secondBody = &b;
+        cp.firstCollider = &ca; cp.secondCollider = &cb;
         cp.SetCollisionInfo(Vector2(0.5f, 0), Vector2(1, 0), 0.5f);
         std::vector<CollisionSolveReq> pairs{cp};
 
@@ -295,11 +302,12 @@ static void TestSolverIntegration()
     {   // 动态 vs 静态
         Rigidbody a(RigidbodyHandle::FromId(0));
         InitBody(a, 1, 1, Vector2(0, 0), Vector2(1, 0), 0);
-        Collider ca, cs;
+        Collider ca(ColliderHandle::FromId(0)), cs(ColliderHandle::FromId(1));
         InitCol(ca, 0.5f, 0.5f, 0.0f, a.position); ca.SetBody(a.Handle());
         InitCol(cs, 0.5f, 0.5f, 0.0f, Vector2(1, 0));       // 无 body = 静态
         CollisionSolveReq cp;
-        cp.SetCollisionRigidbody(&a, nullptr); cp.SetCollisionCollider(&ca, &cs);
+        cp.firstBody = &a; cp.secondBody = nullptr;
+        cp.firstCollider = &ca; cp.secondCollider = &cs;
         cp.SetCollisionInfo(Vector2(0.5f, 0), Vector2(1, 0), 0.5f);
         std::vector<CollisionSolveReq> pairs{cp};
 
@@ -327,7 +335,7 @@ static void TestSolverContinuity()
     Section("B2 多帧复用 / 对象池");
 
     Rigidbody a(RigidbodyHandle::FromId(0)), b(RigidbodyHandle::FromId(1));
-    Collider ca, cb;
+    Collider ca(ColliderHandle::FromId(0)), cb(ColliderHandle::FromId(1));
     PhySolver solver(4);
     bool allOk = true;
     for (int f = 0; f < 120; ++f)
@@ -338,7 +346,8 @@ static void TestSolverContinuity()
         InitCol(cb, 0.5f, 0.5f, 0.0f, b.position); cb.SetBody(b.Handle());
 
         CollisionSolveReq cp;
-        cp.SetCollisionRigidbody(&a, &b); cp.SetCollisionCollider(&ca, &cb);
+        cp.firstBody = &a; cp.secondBody = &b;
+        cp.firstCollider = &ca; cp.secondCollider = &cb;
         cp.SetCollisionInfo(Vector2(0.5f, 0), Vector2(1, 0), 0.5f);
         std::vector<CollisionSolveReq> pairs{cp};
         if (f % 3 == 0) pairs.push_back(cp);        // 偶尔多一个接触点
@@ -377,8 +386,8 @@ static void TestIslandDivider()
 
 // ---------------------------------------------------------------- E 位置修正
 // 本轮改动新增 SolverPair::ApplyPositionCorrection()：
-//   worldA = first.PointLocalToWorld(firstAnchorPoint)      （本地锚点 -> 世界）
-//   worldB = second.PointLocalToWorld(secondAnchorPoint)
+//   worldA = first.PointLocalToWorld(anchorPoint.first)      （本地锚点 -> 世界）
+//   worldB = second.PointLocalToWorld(anchorPoint.second)
 //   depth  = Dot(worldA - worldB, normal)                   （>0 表示重叠）
 //   d      = Clamp(depth - PENETRATE_SLOP, 0, MAX_POS_CORRECTION)
 //   p      = RELAXATION * d / invNormalEffMass * normal
@@ -485,14 +494,15 @@ static void TestPositionCorrectionIntegration()
 
     Rigidbody a(RigidbodyHandle::FromId(0));
     InitBody(a, 1, 1, Vector2(0, 0), Vector2::zero, 0);
-    Collider ca, cs;
+    Collider ca(ColliderHandle::FromId(0)), cs(ColliderHandle::FromId(1));
     InitCol(ca, 0.5f, 0.5f, 0.0f, a.position); ca.SetBody(a.Handle());
     InitCol(cs, 0.5f, 0.5f, 0.0f, Vector2(0, 0));       // 静态体
 
     CollisionSolveReq cp;
-    cp.SetCollisionRigidbody(&a, nullptr); cp.SetCollisionCollider(&ca, &cs);
+    cp.firstBody = &a; cp.secondBody = nullptr;
+    cp.firstCollider = &ca; cp.secondCollider = &cs;
     cp.SetCollisionInfo(Vector2(0, 0), Vector2(1, 0), 0.5f);
-    cp.SetCollisionPoint(Vector2(0.605f, 0), Vector2(0.5f, 0));
+    cp.anchorPoint = { Vector2(0.605f, 0), Vector2(0.5f, 0) };
     std::vector<CollisionSolveReq> pairs{cp};
 
     PhySolver solver(4);
@@ -524,7 +534,8 @@ static void TestEdgeCases()
         InitCol(ca, 0.5f, 0.5f, 0.0f, a.position); ca.SetBody(a.Handle());
         InitCol(cs, 0.5f, 0.5f, 0.0f, Vector2(1, 0));
         CollisionSolveReq cp;
-        cp.SetCollisionRigidbody(&a, nullptr); cp.SetCollisionCollider(&ca, &cs);
+        cp.firstBody = &a; cp.secondBody = nullptr;
+        cp.firstCollider = &ca; cp.secondCollider = &cs;
         cp.SetCollisionInfo(Vector2(0.5f, 0), normal, 0.5f);
         out.push_back(cp);
     };
@@ -541,21 +552,21 @@ static void TestEdgeCases()
 
     {   // 零长度法线
         Rigidbody a(RigidbodyHandle::FromId(0));
-        Collider ca, cs;
+        Collider ca(ColliderHandle::FromId(0)), cs(ColliderHandle::FromId(1));
         std::vector<CollisionSolveReq> pairs;
         buildPairs(a, ca, cs, Vector2(0, 0), pairs);
         Ok(finiteAfter(pairs, 1.0f / 60.0f), "零长度法线 -> 速度/位置保持有限值");
     }
     {   // dt = 0
         Rigidbody a(RigidbodyHandle::FromId(0));
-        Collider ca, cs;
+        Collider ca(ColliderHandle::FromId(0)), cs(ColliderHandle::FromId(1));
         std::vector<CollisionSolveReq> pairs;
         buildPairs(a, ca, cs, Vector2(1, 0), pairs);
         Ok(finiteAfter(pairs, 0.0f), "dt = 0 不产生 NaN（step 已下夹到 Epsilon，无 inf*0）");
     }
     {   // 结果是否写回原对象
         Rigidbody a(RigidbodyHandle::FromId(0));
-        Collider ca, cs;
+        Collider ca(ColliderHandle::FromId(0)), cs(ColliderHandle::FromId(1));
         std::vector<CollisionSolveReq> pairs;
         buildPairs(a, ca, cs, Vector2(1, 0), pairs);
         PhySolver solver(4);
