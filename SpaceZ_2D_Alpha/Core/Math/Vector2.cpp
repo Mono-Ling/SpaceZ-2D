@@ -58,6 +58,10 @@ namespace Core::Math
     {
         return *this - ProjectionVector(axis);
     }
+    Vector2 Vector2::Perp() const
+    {
+        return Vector2(-y, x);
+    }
 
     Vector2 operator+(const Vector2& a, const Vector2& b)
     {

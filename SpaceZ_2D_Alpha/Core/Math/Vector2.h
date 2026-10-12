@@ -22,6 +22,8 @@ namespace Core::Math
         Vector2 ProjectionVector(const Vector2& axis) const;
         Vector2 RejectionVector(const Vector2& axis) const;
 
+        Vector2 Perp() const;
+
         static const Vector2 zero;
         static const Vector2 one;
         static const Vector2 up;
