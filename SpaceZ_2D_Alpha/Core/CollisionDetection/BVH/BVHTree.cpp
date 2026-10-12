@@ -30,9 +30,9 @@ namespace Core::Collision
         _root = nullptr;
         _nodeMap.clear();
     }
-    vector<BVHNode*> BVHTree::PreOrder() const
+    vector<const BVHNode*> BVHTree::PreOrder() const
     {
-        vector<BVHNode*> ans;
+        vector<const BVHNode*> ans;
         stack<BVHNode*> st;
         auto curr = _root;
         while (!st.empty() || curr)
@@ -49,9 +49,9 @@ namespace Core::Collision
         }
         return ans;
     }
-    vector<BVHNode*> BVHTree::InOrder() const
+    vector<const BVHNode*> BVHTree::InOrder() const
     {
-        vector<BVHNode*> ans;
+        vector<const BVHNode*> ans;
         stack<BVHNode*> st;
         auto curr = _root;
         while (!st.empty() || curr)
@@ -111,6 +111,57 @@ namespace Core::Collision
         node = new BVHNode(obj);
         InsertNode(node);
         _nodeMap[collider] = node;
+        node->Update();
+    }
+    vector<CollisionPair> BVHTree::GetCollisionPairs() const
+    {
+        vector<CollisionPair> ans;
+        if(!_root || _root->IsLeaf())
+            return ans;
+        stack<BVHNode*> st;
+        st.push(_root);
+        while (!st.empty())
+        {
+            auto node = st.top();
+            st.pop();
+            if(node->IsLeaf())
+                continue;
+            node->GetSelfCollisionPairs(ans);
+            st.push(node->left);
+            st.push(node->right);
+        }
+        return ans;
+    }
+    vector<ColliderHandle> BVHTree::Overlap(function<bool(const Bound&)> func) const
+    {
+        vector<ColliderHandle> ans;
+        if(!_root)
+            return ans;
+        stack<const BVHNode*> st;
+        st.push(_root);
+        while (!st.empty())
+        {
+            auto node = st.top();
+            st.pop();
+            if(!func(node->bound))
+                continue;
+            if(!node->IsLeaf())
+            {
+                st.push(node->left);
+                st.push(node->right);
+            }
+            else
+                if(func(node->obj.bound))
+                    ans.push_back(node->obj.handle);
+        }
+        return ans;
+    }
+    vector<ColliderHandle> BVHTree::BoundOverlap(const Bound& bound) const
+    {
+        return Overlap([&](const Bound& item)->bool
+        {
+            return IsIntersect(item, bound);
+        });
     }
 
     void BVHTree::InsertNode(BVHNode* node)

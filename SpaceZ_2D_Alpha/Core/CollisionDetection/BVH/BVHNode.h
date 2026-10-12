@@ -1,8 +1,10 @@
 #pragma once
 #include "CollisionDetection/Geometry/Bound.h"
 #include "CollisionDetection/BVH/BVHNodeObj.h"
+#include "Collision/CollisionPair.h"
 #include "Math/Math.h"
 #include <cfloat>
+#include <vector>
 
 namespace Core::Collision
 {
@@ -48,6 +50,7 @@ namespace Core::Collision
             right = nullptr;
             parent = nullptr;
         }
+        void GetSelfCollisionPairs(std::vector<CollisionPair>& ans) const;
     };
     inline bool IsIntersect(const BVHNode& a, const BVHNode& b)
     {

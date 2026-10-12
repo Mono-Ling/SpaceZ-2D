@@ -1,7 +1,9 @@
 #pragma once
 #include "CollisionDetection/BVH/BVHNode.h"
+#include "Collision/CollisionPair.h"
 #include <unordered_map>
 #include <vector>
+#include <functional>
 
 namespace Core::Collision
 {
@@ -23,8 +25,12 @@ namespace Core::Collision
         void Remove(const ColliderHandle& collider);
         void UpdateCollider(const ColliderHandle& collider, const RigidbodyHandle& body, const Bound& bound);
 
-        std::vector<BVHNode*> PreOrder() const;
-        std::vector<BVHNode*> InOrder() const;
+        std::vector<const BVHNode*> PreOrder() const;
+        std::vector<const BVHNode* > InOrder() const;
+
+        std::vector<CollisionPair> GetCollisionPairs() const;
+        std::vector<ColliderHandle> Overlap(std::function<bool(const Bound&)> func) const;
+        std::vector<ColliderHandle> BoundOverlap(const Bound& bound) const;
 
     private:
         void InsertNode(BVHNode* node);
