@@ -12,6 +12,8 @@ namespace Core::Collision
         bool AddPoint(const Math::Vector2& point);
         bool ContainsOrigin(Math::Vector2& update);
 
+        bool TryComplete(Math::Vector2& update);
+
     private:
         bool PointContainsOrigin(Math::Vector2& update);
         bool LineContainsOrigin(Math::Vector2& update);
@@ -19,5 +21,7 @@ namespace Core::Collision
         void SetPoints(const Math::Vector2& point);
         void SetPoints(const Math::Vector2& a, const Math::Vector2& b);
         Math::Vector2 GetVerticalToOrigin(const Math::Vector2& a, const Math::Vector2& b);
+
+        void ClearCollinear();
     };
 }

@@ -109,6 +109,10 @@ namespace Core::Math
         t = Clamp01(t);
         return start + (end - start) * t;
     }
+    bool IsCollinear(const Vector2& a, const Vector2& b, const Vector2& c)
+    {
+        return Abs(Cross(b - a, c - a)) < Epsilon;
+    }
 }
 namespace Core
 {

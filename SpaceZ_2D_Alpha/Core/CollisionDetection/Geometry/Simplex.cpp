@@ -25,6 +25,19 @@ namespace Core::Collision
         }
         return false;
     }
+    bool Simplex::TryComplete(Math::Vector2& update)
+    {
+        ClearCollinear();
+        if(currentCount == 3)
+            return true;
+        if(currentCount == 1)
+        {
+            update = -points[0];
+            return false;
+        }
+        update = GetVerticalToOrigin(points[0], points[1]);
+        return false;
+    }
 
     bool Simplex::PointContainsOrigin(Vector2& update)
     {
@@ -49,7 +62,7 @@ namespace Core::Collision
         else
         {
             update = GetVerticalToOrigin(A, B);
-            if(!Cross(AB, AO) && AB.LengthSquared() > AO.LengthSquared())
+            if(!Abs(Cross(AB, AO)) && AB.LengthSquared() > AO.LengthSquared())
                 return true;
         }
         return false;
@@ -100,5 +113,26 @@ namespace Core::Collision
     {
         auto v = (b - a).Perp();
         return Dot(v, -a) < 0 ? -v : v;
+    }
+    void Simplex::ClearCollinear()
+    {
+        
+        auto A = points[2];
+        auto B = points[1];
+        auto C = points[0];
+        if(!IsCollinear(A, B, C))
+            return;
+
+        float ABlen = (B - A).LengthSquared();
+        float AClen = (C - A).LengthSquared();
+        float BClen = (C - B).LengthSquared();
+        float maxLen = Max(Max(ABlen, AClen), BClen);
+
+        if(Abs(ABlen - maxLen) < Epsilon * Epsilon)
+            SetPoints(A, B);
+        else if(Abs(AClen - maxLen) < Epsilon * Epsilon)
+            SetPoints(A, C);
+        else
+            SetPoints(B, C);
     }
 }

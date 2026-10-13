@@ -43,6 +43,7 @@ namespace Core::Math
     float Dot(const Vector2& a, const Vector2& b);
     float Cross(const Vector2& a, const Vector2& b);
     Vector2 Lerp(const Vector2& start, const Vector2& end, float t);
+    bool IsCollinear(const Vector2& a, const Vector2& b, const Vector2& c);
 }
 namespace Core
 {
