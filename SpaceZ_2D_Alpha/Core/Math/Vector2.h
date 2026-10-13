@@ -44,6 +44,7 @@ namespace Core::Math
     float Cross(const Vector2& a, const Vector2& b);
     Vector2 Lerp(const Vector2& start, const Vector2& end, float t);
     bool IsCollinear(const Vector2& a, const Vector2& b, const Vector2& c);
+    float PointToLineDistance(const Vector2& point, const Vector2& a, const Vector2& b);
 }
 namespace Core
 {

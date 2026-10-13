@@ -113,6 +113,10 @@ namespace Core::Math
     {
         return Abs(Cross(b - a, c - a)) < Epsilon;
     }
+    float PointToLineDistance(const Vector2& point, const Vector2& a, const Vector2& b)
+    {
+        return Abs(Cross(point - a, b - a)) / Max(Epsilon, (b - a).Length());
+    }
 }
 namespace Core
 {
