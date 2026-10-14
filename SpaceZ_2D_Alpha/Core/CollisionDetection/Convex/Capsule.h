@@ -16,13 +16,13 @@ namespace Core::Collision
             _height = Math::Abs(h);
             _radius = Math::Abs(r);
         }
-        inline Math::Vector2 SupportLocal(const Math::Vector2& dir) override
+        inline Math::Vector2 SupportLocal(const Math::Vector2& dir) const override
         {
             float halfH = _height / 2.0f;
             float y = dir.y > 0.0f ? halfH : (dir.y < 0.0f ? -halfH : 0.0f);
             return Math::Vector2(0.0f, y) + dir.Normalized() * _radius;
         }
-        inline Math::Vector2 SurfacePointLocal(const Math::Vector2& dir) override
+        inline Math::Vector2 SurfacePointLocal(const Math::Vector2& dir) const override
         {
             Math::Vector2 d = dir.Normalized();
             if (Math::Abs(d.x) < Math::Epsilon && Math::Abs(d.y) < Math::Epsilon)

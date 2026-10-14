@@ -11,7 +11,7 @@ namespace Core::Collision
 
     public:
         inline void SetSphere(float r) { _radius = Math::Abs(r); }
-        inline Math::Vector2 SupportLocal(const Math::Vector2& dir) override
+        inline Math::Vector2 SupportLocal(const Math::Vector2& dir) const override
         {
             return dir.Normalized() * _radius;
         }

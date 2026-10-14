@@ -60,11 +60,7 @@ namespace Core::Collision
             update = -A;
         }
         else
-        {
             update = GetVerticalToOrigin(A, B);
-            if(!Abs(Cross(AB, AO)) && AB.LengthSquared() > AO.LengthSquared())
-                return true;
-        }
         return false;
     }
     bool Simplex::TriangleContainsOrigin(Vector2& update)

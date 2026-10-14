@@ -18,7 +18,7 @@ namespace Core::Collision
                 Math::Abs(extents.y)
             };
         }
-        inline Math::Vector2 SupportLocal(const Math::Vector2& dir) override
+        inline Math::Vector2 SupportLocal(const Math::Vector2& dir) const override
         {
             return Math::Vector2
             {
@@ -26,12 +26,12 @@ namespace Core::Collision
                 dir.y > 0 ? _extents.y : -_extents.y
             };
         }
-        inline Math::Vector2 SurfacePointLocal(const Math::Vector2& dir) override
+        inline Math::Vector2 SurfacePointLocal(const Math::Vector2& dir) const override
         {
             Math::Vector2 d = dir.Normalized();
             if (Math::Abs(d.x) < Math::Epsilon && Math::Abs(d.y) < Math::Epsilon)
                 return Math::Vector2::zero;
-            
+
             float tx = Math::Abs(d.x) > Math::Epsilon ? _extents.x / Math::Abs(d.x) : Math::Infinity;
             float ty = Math::Abs(d.y) > Math::Epsilon ? _extents.y / Math::Abs(d.y) : Math::Infinity;
             return d * Math::Min(tx, ty);
