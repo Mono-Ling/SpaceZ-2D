@@ -26,6 +26,9 @@ namespace Core::Math
         float WorldRotation() const;
         Vector2 WorldScale() const;
 
+        void SetWorldPosition(const Vector2& pos);
+        void SetWorldRotation(float rot);
+
         void SetLocalPosition(const Vector2& pos);
         void SetLocalRotation(float rot);
         void SetLocalScale(const Vector2& scale);

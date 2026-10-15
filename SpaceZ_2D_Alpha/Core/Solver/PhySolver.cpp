@@ -1,7 +1,9 @@
 #include "Solver/PhySolver.h"
+#include "Solver/PhyQuantities.h"
 #include "Object/Rigidbody.h"
 #include "Object/Collider.h"
 #include "Math/Vector2.h"
+#include "Math/Math.h"
 using namespace std;
 using namespace Core::Collision;
 using namespace Core::Math;
@@ -12,8 +14,8 @@ namespace Core::Solver
     {
         if(!solverBody || !body)
             return;
-        solverBody->angle = body->angle;
-        solverBody->position = body->position;
+        solverBody->angle = body->Rotation();
+        solverBody->position = body->Position();
 
         solverBody->angularVelocity = body->angularVelocity;
         solverBody->linearVelocity = body->linearVelocity;
@@ -22,8 +24,8 @@ namespace Core::Solver
     {
         if(!solverBody || !collider)
             return;
-        solverBody->angle = collider->angle;
-        solverBody->position = collider->position;
+        solverBody->angle = collider->Rotation();
+        solverBody->position = collider->Position();
 
         solverBody->angularVelocity = 0.0f;
         solverBody->linearVelocity = Vector2::zero;
@@ -64,6 +66,42 @@ namespace Core::Solver
             if(p.second) _solverBodyBuffer.push(p.second);
         _solverBodies.clear();
         _staticSolverBodies.clear();
+    }
+    void PhySolver::AddForce(Rigidbody* body, const Vector2& force, float dt)
+    {
+        if(!body)
+            return;
+        dt = Max(Epsilon, dt);
+        auto solver = CreateSolverRigidbody(body->mass, body->inertia);
+        SetSolverRigidbody(solver, body);
+        solver->ApplyImpulse(force * dt);
+ 
+        body->linearVelocity = solver->linearVelocity;
+
+        _solverBodyBuffer.push(solver);
+    }
+    void PhySolver::AddTorque(Rigidbody* body, float moment, float dt)
+    {
+        if(!body)
+            return;
+        dt = Max(Epsilon, dt);
+        auto solver = CreateSolverRigidbody(Max(body->mass, Epsilon), Max(body->inertia, Epsilon));
+        SetSolverRigidbody(solver, body);
+        solver->ApplyImpulseMoment(moment * dt);
+
+        body->angularVelocity = solver->angularVelocity;
+
+        _solverBodyBuffer.push(solver);
+    }
+    void PhySolver::ApplyGravity(vector<Rigidbody*>& bodys, float dt)
+    {
+        for(auto ptr : bodys)
+        {
+            if(!ptr)
+                continue;
+            auto G = ptr->mass * PhyQuantities::GRAVITY_ACCELERATION;
+            AddForce(ptr, G * Vector2::down, dt);
+        }
     }
 
     SolverRigidbody* PhySolver::CreateSolverRigidbody(float m, float i)

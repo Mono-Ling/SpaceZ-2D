@@ -28,6 +28,11 @@ namespace Core::Solver
         void Foreach(std::function<void(const RigidbodyHandle&, const SolverRigidbody* const)> func);
         void ClearTemp();
 
+        void AddForce(Rigidbody* body, const Math::Vector2& force, float dt);
+        void AddTorque(Rigidbody* body, float moment, float dt);
+
+        void ApplyGravity(std::vector<Rigidbody*>& bodys, float dt);
+
     private:
         SolverRigidbody* CreateSolverRigidbody(float m, float i);
         SolverRigidbody* CreateSolverRigidbody();

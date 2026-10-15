@@ -19,6 +19,17 @@ namespace Core::Math
         return Vector2(parentS.x * _scale.x, parentS.y * _scale.y);
     }
 
+    void Transform::SetWorldPosition(const Vector2& pos)
+    {
+        _position = MulPoint(_worldToParent, pos);
+        _dirty = true;
+    }
+    void Transform::SetWorldRotation(float rot)
+    {
+        _rotation = rot - _parentToWorld.GetRotate();
+        _dirty = true;
+    }
+
     void Transform::SetLocalPosition(const Vector2& pos)
     {
         _position = pos;

@@ -12,5 +12,8 @@ namespace Core::Solver
         
         /// @brief 允许穿透
         constexpr float PENETRATE_SLOP = 0.005f;
+
+        /// @brief 重力加速度
+        constexpr float GRAVITY_ACCELERATION = 9.8f;
     }
 }
