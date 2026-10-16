@@ -90,6 +90,7 @@ namespace Core::Collision
                 break;
             polygon.AddPoint(newPoint);
         }
+        p.depth = depth;
         p.normal = normal;
         auto wFirst = first.SurfacePoint(normal);
         auto wSecond = second.SurfacePoint(-normal);

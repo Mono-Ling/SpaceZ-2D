@@ -19,7 +19,7 @@ namespace Core
         bool TryRemove(Handle<T> handle);
         bool TryGet(const Handle<T>& handle, T*& ptr) const;
         bool Contains(const Handle<T>& handle) const;
-        void Foreach(const std::function<void(const Handle<T>&, const T*)>& func);
+        void Foreach(const std::function<void(const Handle<T>&, T*)>& func);
     };
 }
 #include "Object/ObjectMgr.tpp"

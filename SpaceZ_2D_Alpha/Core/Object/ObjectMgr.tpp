@@ -47,7 +47,7 @@ namespace Core
         return _objMap.count(handle);
     }
     template<typename T>
-    void ObjectMgr<T>::Foreach(const std::function<void(const Handle<T>&, const T*)>& func)
+    void ObjectMgr<T>::Foreach(const std::function<void(const Handle<T>&, T*)>& func)
     {
         for(auto& p : _objMap)
             func(p.first, p.second);

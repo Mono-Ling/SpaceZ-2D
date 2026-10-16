@@ -93,16 +93,6 @@ namespace Core::Solver
 
         _solverBodyBuffer.push(solver);
     }
-    void PhySolver::ApplyGravity(vector<Rigidbody*>& bodys, float dt)
-    {
-        for(auto ptr : bodys)
-        {
-            if(!ptr)
-                continue;
-            auto G = ptr->mass * PhyQuantities::GRAVITY_ACCELERATION;
-            AddForce(ptr, G * Vector2::down, dt);
-        }
-    }
 
     SolverRigidbody* PhySolver::CreateSolverRigidbody(float m, float i)
     {

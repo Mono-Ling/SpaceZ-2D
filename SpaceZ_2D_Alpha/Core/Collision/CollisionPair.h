@@ -19,6 +19,7 @@ namespace Core::Collision
         CollisionObj first;
         CollisionObj second;
 
+        float depth = 0;
         Math::Vector2 normal = Math::Vector2::zero; // first -> second
         Math::Vector2 point = Math::Vector2::zero;
         std::pair<Math::Vector2, Math::Vector2> anchorPoint;

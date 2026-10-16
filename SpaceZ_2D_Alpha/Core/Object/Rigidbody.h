@@ -18,6 +18,9 @@ namespace Core
 
         Math::Vector2 linearVelocity;
 
+        float torque = 0.0f;
+        Math::Vector2 force;
+
     private:
         Math::Transform _transform;
 
@@ -30,8 +33,9 @@ namespace Core
         inline float Rotation() const { return _transform.WorldRotation(); }
         inline const Math::Transform& Transform() const { return _transform; }
 
-        inline void Position(const Math::Vector2& pos) { _transform.SetWorldPosition(pos); }
-        inline void Rotation(float rot) { _transform.SetWorldRotation(rot); }
+        inline void Position(const Math::Vector2& pos) { _transform.SetLocalPosition(pos); }
+        inline void Rotation(float rot) { _transform.SetLocalRotation(rot); }
+        inline void Scale(const Math::Vector2& scale) { _transform.SetLocalScale(scale); }
 
         inline void Step(float dt)
         {

@@ -3,15 +3,16 @@
 #include "Math/Vector2.h"
 #include "Math/Transform.h"
 #include "CollisionDetection/Geometry/Bound.h"
+#include "CollisionDetection/NarrowPhase/ConvexDetectReq.h"
 
 namespace Core
 {
     class Collider
     {
     public:
-        float staticFriction;
-        float dynamicFriction;
-        float elasticity;
+        float staticFriction = 0.0f;
+        float dynamicFriction = 0.0f;
+        float elasticity = 0.5f;
 
     private:
         RigidbodyHandle _body = RigidbodyHandle::null;
@@ -47,11 +48,11 @@ namespace Core
             _transform.SetParentTransform(parent);
             UpdateBound();
         }
+
+        virtual Collision::ConvexDetectReq GetConvexDetectReq() const = 0;
         
     protected:
         virtual Math::Vector2 Support(const Math::Vector2& dir) const = 0;
-    
-    private:
         inline void UpdateBound()
         {
             Math::Vector2 minV
