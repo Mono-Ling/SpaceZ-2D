@@ -68,9 +68,8 @@ namespace Core
             collider->SetBody(body);
             _dynamicColliders[body].insert(handle);
             collider->SetParentTransform(bodyPtr->Transform());
-
-            _dirtyColliderSet.insert(handle);
         }
+        _dirtyColliderSet.insert(handle);
         return handle;
     }
     void PhySystem::DestroyBody(const RigidbodyHandle& handle)
@@ -91,11 +90,12 @@ namespace Core
         auto collider = TryGetCollider<Collider>(handle);
         if(!collider)
             return;
+        auto body = collider->Body();
         _colliders.TryRemove(handle);
         _breadthPhase.Remove(handle);
         delete collider;
 
-        auto it = _dynamicColliders.find(collider->Body());
+        auto it = _dynamicColliders.find(body);
         if(it == _dynamicColliders.end())
             return;
         it->second.erase(handle);
@@ -105,8 +105,8 @@ namespace Core
         auto body = TryGetBody(handle);
         if(!body)
             return;
-        body->mass = Max(0.0f, mass);
-        body->inertia = Max(0.0f, inertia);
+        body->mass = Max(Epsilon, mass);
+        body->inertia = Max(Epsilon, inertia);
     }
     void PhySystem::SetVelocity(const RigidbodyHandle& handle, const Vector2& lv, float av)
     {
@@ -156,7 +156,7 @@ namespace Core
         body->Rotation(rot);
         body->Scale(scale);
 
-        auto colliderSet = _dynamicColliders[handle];
+        auto& colliderSet = _dynamicColliders[handle];
         for(auto& c : colliderSet)
         {
             auto collider = TryGetCollider<Collider>(c);
@@ -302,7 +302,7 @@ namespace Core
         auto bodyPtr = TryGetBody(body);
         if(!bodyPtr)
             return;
-        auto colliderSet = _dynamicColliders[body];
+        auto& colliderSet = _dynamicColliders[body];
         for(auto& c : colliderSet)
         {
             auto collider = TryGetCollider<Collider>(c);
