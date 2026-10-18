@@ -1,5 +1,6 @@
 #include "ExportInterface/ExportInterface.h"
 #include "System/PhySystem.h"
+#include "ExportInterface/ExportInfo/ExportHandle.h"
 #include "ExportInterface/ExportInfo/ObjectInfo.h"
 #include "ExportInterface/ExportInfo/TransformInfo.h"
 #include "ExportInterface/ExportInfo/ColliderInfo.h"
@@ -10,29 +11,29 @@ using namespace Export;
 using namespace std;
 
 #pragma region 生命周期
-EXPORT_FUNCTION RigidbodyHandle CreateBody()
+EXPORT_FUNCTION ExportHandle<Rigidbody> CreateBody()
 {
     if(!IsEngineAvailable())
-        return RigidbodyHandle::null;
+        return ExportHandle<Rigidbody>::From(RigidbodyHandle::null);
     TRY_CATCH_DEBUG
     (
-        { return phySystemPtr->CreateBody(); },
+        { return ExportHandle<Rigidbody>::From(phySystemPtr->CreateBody()); },
         "物理对象",
         "刚体创建异常"
     );
-    return RigidbodyHandle::null;
+    return ExportHandle<Rigidbody>::From(RigidbodyHandle::null);
 }
-EXPORT_FUNCTION ColliderHandle CreateCollider(ColliderType type, RigidbodyHandle body)
+EXPORT_FUNCTION ExportHandle<Collider> CreateCollider(ColliderType type, RigidbodyHandle body)
 {
     if(!IsEngineAvailable())
-        return ColliderHandle::null;
+        return ExportHandle<Collider>::From(ColliderHandle::null);
     TRY_CATCH_DEBUG
     (
-        { return phySystemPtr->CreateCollider(type, body); },
+        { return ExportHandle<Collider>::From(phySystemPtr->CreateCollider(type, body)); },
         "物理对象",
         "碰撞体创建异常"
     );
-    return ColliderHandle::null;
+    return ExportHandle<Collider>::From(ColliderHandle::null);
 }
 EXPORT_FUNCTION void DestroyBody(RigidbodyHandle handle)
 {

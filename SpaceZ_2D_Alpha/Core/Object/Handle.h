@@ -7,35 +7,40 @@ namespace Core
     template<typename T>
     struct Handle
     {
-        int id = -1;
-        int generation = 0;
+    private:
+        int _id = -1;
+        int _generation = 0;
+
+    public:
         static constexpr Handle<T> FromId(int id)
         {
             if(id < 0)
                 return null;
             Handle<T> handle;
-            handle.id = id;
-            handle.generation = 0;
+            handle._id = id;
+            handle._generation = 0;
             return handle;
         }
+        constexpr int Id() const { return _id; }
+        constexpr int Generation() const { return _generation; }
         constexpr bool Equals(const Handle<T>& other) const
         {
-            return id == other.id && generation == other.generation;
+            return _id == other._id && _generation == other._generation;
         }
         constexpr std::size_t GetHashCode() const
         {
-            std::size_t h1 = std::hash<int>{}(id);
-            std::size_t h2 = std::hash<int>{}(generation);
+            std::size_t h1 = std::hash<int>{}(_id);
+            std::size_t h2 = std::hash<int>{}(_generation);
 
             return h1 ^ (h2 + 0x9e3779b9 + (h1 << 6) + (h1 >> 2));
         }
-        inline void CarrySelf() { generation++; }
+        inline void CarrySelf() { _generation++; }
 
         friend constexpr bool operator<(const Handle<T>& a, const Handle<T>& b)
         {
-            if(a.generation != b.generation)
-                return a.generation < b.generation;
-            return a.id < b.id;
+            if(a._generation != b._generation)
+                return a._generation < b._generation;
+            return a._id < b._id;
         }
 
         static const Handle<T> null;
