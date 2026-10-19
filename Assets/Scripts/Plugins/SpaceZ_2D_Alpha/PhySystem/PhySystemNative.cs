@@ -139,7 +139,7 @@ namespace SpaceZ_2D.Alpha
         => _createCollider?.Invoke(type, body) ?? Handle.NULL;
         private static void DestroyBody(Handle handle) => _destroyBody?.Invoke(handle);
         private static void DestroyCollider(Handle handle) => _destroyCollider?.Invoke(handle);
-        private static void SetColliderBody(ColliderBodyInfo info) => _setColliderBody?.Invoke(info);
+        private static void SetColliderBody(Handle handle, Handle body) => _setColliderBody?.Invoke(handle, body);
         #endregion
 
         #region 数据批量同步
@@ -192,7 +192,7 @@ namespace SpaceZ_2D.Alpha
         [DllImport(PLUGIN_NAME, EntryPoint = "DestroyCollider")]
         private extern static void DestroyCollider(Handle handle);
         [DllImport(PLUGIN_NAME, EntryPoint = "SetColliderBody")]
-        private extern static void SetColliderBody(ColliderBodyInfo info);
+        private extern static void SetColliderBody(Handle handle, Handle body);
 
         [DllImport(PLUGIN_NAME, EntryPoint = "SetBodies")]
         private extern static unsafe void SetBodies(BodyMassInfo* infos, int count);

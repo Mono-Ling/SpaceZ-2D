@@ -57,14 +57,14 @@ EXPORT_FUNCTION void DestroyCollider(ColliderHandle handle)
         "销毁碰撞体异常"
     );
 }
-EXPORT_FUNCTION void SetColliderBody(ObjectInfo<Collider, RigidbodyHandle> info)
+EXPORT_FUNCTION void SetColliderBody(ColliderHandle handle, RigidbodyHandle body)
 {
     if(!IsEngineAvailable())
         return;
     TRY_CATCH_DEBUG
     (
         {
-            phySystemPtr->SetColliderRigidbody(info.handle, info.info);
+            phySystemPtr->SetColliderRigidbody(handle, body);
             phySystemPtr->SynBreadthPhase();
         },
         "物理对象",

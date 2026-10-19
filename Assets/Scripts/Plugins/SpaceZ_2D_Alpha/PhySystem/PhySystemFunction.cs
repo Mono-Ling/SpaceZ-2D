@@ -45,7 +45,7 @@ namespace SpaceZ_2D.Alpha
         public delegate void DestroyCollider(Handle handle);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate void SetColliderBody(ColliderBodyInfo info);
+        public delegate void SetColliderBody(Handle handle, Handle body);
         #endregion
 
         #region 数据批量同步
