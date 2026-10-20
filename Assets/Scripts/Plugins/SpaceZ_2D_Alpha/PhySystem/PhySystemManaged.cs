@@ -25,6 +25,10 @@ namespace SpaceZ_2D.Alpha
         private static ReadOnlyNativeBuffer<BodyForceInfo> _bodyForceBuffer = new();
         private static ReadOnlyNativeBuffer<BodyTorqueInfo> _bodyTorqueBuffer = new();
 
+        private static NativeDataBuffer<BodyState> _bodyStateBuffer = new();
+
+        private static List<IOnPhyUpdate> _temp = new();
+
         [RuntimeStart(-90)]
         private static void InitManaged()
         {
@@ -41,10 +45,16 @@ namespace SpaceZ_2D.Alpha
 
             _bodyForceBuffer.Init();
             _bodyTorqueBuffer.Init();
+
+            _bodyStateBuffer.Init();
+
+            PhyLateUpdate.Add(Step);
         }
         [RuntimeEnd(90)]
         private static void OnApplicationQuitManaged()
         {
+            PhyLateUpdate.Remove(Step);
+            
             StopEngine();
 
             _bodyMassBuffer.Dispose();
@@ -58,6 +68,27 @@ namespace SpaceZ_2D.Alpha
 
             _bodyForceBuffer.Dispose();
             _bodyTorqueBuffer.Dispose();
+
+            _bodyStateBuffer.Dispose();
+        }
+        private static void Step()
+        {
+            ComponentUpdate();
+            SyncDirtyData();
+            EngineStep(PhyTime.deltaTime);
+            GetDirtyBodies();
+        }
+        private static void ComponentUpdate()
+        {
+            _temp.Clear();
+            foreach(var body in _bodies.Values)
+                if(body is IOnPhyUpdate bUpdate)
+                    _temp.Add(bUpdate);
+            foreach(var collider in _colliders.Values)
+                if(collider is IOnPhyUpdate cUpdate)
+                    _temp.Add(cUpdate);
+            for(int i = 0; i < _temp.Count; i++)
+                _temp[i].OnPhyUpdate();
         }
         private static void SyncDirtyData()
         {
@@ -75,6 +106,20 @@ namespace SpaceZ_2D.Alpha
                 _bodyForceBuffer.SyncAndClear(AddForce);
                 _bodyTorqueBuffer.SyncAndClear(AddTorque);
             }
+        }
+        private static void GetDirtyBodies()
+        {
+            int count = GetDirtyBodyCount();
+            if(count < 0)
+                Debug.LogError("【托管物理系统】更改碰撞体数量获取异常");
+            unsafe
+            {
+                _bodyStateBuffer.GetNativeData(ref count, GetDirtyBody);
+            }
+            var list = _bodyStateBuffer.NativeDataList;
+            foreach(var state in list)
+                if(state.handle != Handle.NULL && _bodies.TryGetValue(state.handle, out var body))
+                    body?.SetState(state);
         }
     }
 }

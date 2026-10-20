@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace SpaceZ_2D.Alpha
@@ -28,7 +30,7 @@ namespace SpaceZ_2D.Alpha
                 return;
             unsafe
             {
-                T* ptr = (T*)_buffer.GetUnsafeReadOnlyPtr();
+                T* ptr = _buffer.GetUnsafeReadOnlyPtr();
                 func?.Invoke(ptr, _buffer.Length);
             }
             _buffer.Clear();
@@ -47,11 +49,11 @@ namespace SpaceZ_2D.Alpha
                 return;
             unsafe
             {
-                T* ptr = (T*)_buffer.GetUnsafePtr();
+                T* ptr = _buffer.GetUnsafePtr();
                 func?.Invoke(ptr, ref count);
             }
             _buffer.Length = Mathf.Max(0, count);
         }
-        public IEnumerator NativeDataList => _buffer.GetEnumerator();
+        public NativeList<T> NativeDataList => _buffer;
     }
 }

@@ -6,11 +6,85 @@ using UnityEngine;
 
 namespace SpaceZ_2D.Alpha
 {
+    [DefaultExecutionOrder(-10)]
     public class Rigidbody2DAlpha : PhySystem.Rigidbody2DAlpha {}
     public static partial class PhySystem
     {
-        public class Rigidbody2DAlpha : NativeComponent<Rigidbody2DAlpha>
+        public class Rigidbody2DAlpha : NativeComponent<Rigidbody2DAlpha>, IOnPhyUpdate
         {
+            public Vector2 LinearVelocity
+            {
+                get => _linearVelocity;
+                set
+                {
+                    if(value == _linearVelocity)
+                        return;
+                    SetVelocity(value, _angularVelocity);
+                    _linearVelocity = value;
+                }
+            }
+            public float AngularVelocity
+            {
+                get => _angularVelocity;
+                set
+                {
+                    if(value == _angularVelocity)
+                        return;
+                    SetVelocity(_linearVelocity, value);
+                    _angularVelocity = value;
+                }
+            }
+            
+            public float Mass
+            {
+                get => _mass;
+                set
+                {
+                    value = Mathf.Max(0f, value);
+                    if(value == _mass)
+                        return;
+                    SetBody(value, _inertia);
+                    _mass = value;
+                }
+            }
+            public float Inertia
+            {
+                get => _inertia;
+                set
+                {
+                    value = Mathf.Max(0f, value);
+                    if(value == _inertia)
+                        return;
+                    SetBody(_mass, value);
+                    _inertia = value;
+                }
+            }
+
+            private float _angularVelocity;
+            private Vector2 _linearVelocity;
+            private float _mass = 1f;
+            private float _inertia = 1f;
+
+            private (Vector2 pos, float rot, Vector2 scale) _preTransform;
+
+            void Awake()
+            => CreateBody();
+            public void OnPhyUpdate()
+            {
+                Vector2 currPos = new(){ x = transform.position.x, y = transform.position.y};
+                float currRot = transform.eulerAngles.z * Mathf.Deg2Rad;
+                Vector2 currScale = new(){ x = transform.lossyScale.x, y = transform.lossyScale.y};
+                
+                if(currPos != _preTransform.pos
+                || currRot != _preTransform.rot
+                || currScale != _preTransform.scale)
+                    SetTransform(currPos, currRot, currScale);
+
+                _preTransform = (currPos, currRot, currScale);
+            }
+            void OnDestroy()
+            => DestroyBody();
+
             private void CreateBody()
             {
                 var handle = PhySystem.CreateBody();
@@ -25,6 +99,7 @@ namespace SpaceZ_2D.Alpha
                 _handle = handle;
 
                 _dynamicColliderMap.Add(handle, new());
+                Debug.Log($"【刚体】创建刚体{_handle}");
             }
             private void DestroyBody()
             {
@@ -43,6 +118,7 @@ namespace SpaceZ_2D.Alpha
                 _bodies.Remove(_handle);
 
                 _handle = Handle.NULL;
+                Debug.Log($"【刚体】销毁刚体{_handle}");
             }
             private void SetBody(float mass, float inertia)
             {
@@ -97,6 +173,18 @@ namespace SpaceZ_2D.Alpha
                     handle = _handle,
                     torque = t,
                 });
+            }
+
+            public void SetState(BodyState state)
+            {
+                if(!IsEnable(_bodies) || state.handle != _handle)
+                    return;
+                transform.rotation = Quaternion.AngleAxis(state.rotation * Mathf.Rad2Deg, Vector3.forward);
+                transform.position = new() { x = state.position.x, y = state.position.y, z = transform.position.z};
+                _angularVelocity = state.angularVelocity;
+                _linearVelocity = state.linearVelocity;
+
+                _preTransform = (state.position, state.rotation, _preTransform.scale);
             }
         }
     }
