@@ -45,20 +45,36 @@ namespace SpaceZ_2D.Alpha
                     _elasticity = value;
                 }
             }
+            [SerializeField]
             private float _staticFriction;
+            [SerializeField]
             private float _dynamicFriction;
+            [SerializeField]
             private float _elasticity = 0.5f;
 
             private Transform _bodyObj;
             private Handle _body = Handle.NULL;
             
             private (Vector2 pos, float rot, Vector2 scale) _preTransform;
+
+            protected void Create(ColliderType type)
+            {
+                var obj = GetComponentInParent<Rigidbody2DAlpha>();
+                _body = obj?.Handle ?? Handle.NULL;
+                CreateCollider(type);
+                SetCollider(_staticFriction, _dynamicFriction, _elasticity);
+
+                _bodyObj = obj?.transform ?? null;
+                UpdateTransform();
+            }
             void OnTransformParentChanged()
             {
                 var obj = GetComponentInParent<Rigidbody2DAlpha>();
                 var curr = obj?.transform ?? null;
-                if(curr = _bodyObj)
+                if(curr == _bodyObj)
                     return;
+                _bodyObj = curr;
+                SetBody(obj?.Handle ?? Handle.NULL);
                 UpdateTransform();
             }
             public void OnPhyUpdate() => UpdateTransform();

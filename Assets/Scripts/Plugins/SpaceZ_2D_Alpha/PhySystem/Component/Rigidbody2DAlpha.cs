@@ -62,13 +62,18 @@ namespace SpaceZ_2D.Alpha
 
             private float _angularVelocity;
             private Vector2 _linearVelocity;
+            [SerializeField]
             private float _mass = 1f;
+            [SerializeField]
             private float _inertia = 1f;
 
             private (Vector2 pos, float rot, Vector2 scale) _preTransform;
 
             void Awake()
-            => CreateBody();
+            {
+                CreateBody();
+                SetBody(_mass, _inertia);
+            }
             public void OnPhyUpdate()
             {
                 Vector2 currPos = new(){ x = transform.position.x, y = transform.position.y};
