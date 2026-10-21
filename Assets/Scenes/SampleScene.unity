@@ -463,7 +463,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1249242876
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -478,7 +478,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _staticFriction: 0
   _dynamicFriction: 0
-  _elasticity: 0.5
+  _elasticity: 1
   _extents: {x: 0.5, y: 0.5}
 --- !u!212 &1249242877
 SpriteRenderer:

@@ -28,6 +28,16 @@ namespace Core::Solver
         elasticity = Min(a.elasticity, b.elasticity);
     }
 
+    void SolverPair::InitVelocityBias()
+    {
+        if(!first || !second)
+            return;
+        auto rA = point - first->position;
+        auto rB = point - second->position;
+        float nV = Dot(first->GetRealVelocity(rA) - second->GetRealVelocity(rB), normal);
+
+        normalVelocityBias = (nV > Epsilon) ? -elasticity * nV : 0.0f;
+    }
     void SolverPair::ApplyNormalImpulse()
     {
         if(!first || !second)
@@ -40,10 +50,11 @@ namespace Core::Solver
 
         // first -> second
         auto nV = Dot(vA - vB, normal);
-        nV = Max(0.0f, nV);
 
-        float curr = (1.0f + elasticity) / Max(invNormalEffMass, Epsilon) * nV;
-        normalImpulse += curr;
+        float curr = (nV - normalVelocityBias) / Max(invNormalEffMass, Epsilon);
+        float newImpulse = Max(0.0f, normalImpulse + curr);
+        curr = newImpulse - normalImpulse;
+        normalImpulse = newImpulse;
         auto p = curr * normal;
         first->ApplyImpulse(-p);
         second->ApplyImpulse(p);

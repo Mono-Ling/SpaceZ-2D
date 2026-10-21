@@ -183,6 +183,7 @@ namespace Core::Solver
             }
             solverPair.SetRigidbody(a, b);
             solverPair.SetContact(*p.firstCollider, *p.secondCollider);
+            solverPair.InitVelocityBias();
             ans.push_back(solverPair);
         }
         return ans;

@@ -19,6 +19,7 @@ namespace Core::Solver
         float invTangentEffMass = 0;
         float normalImpulse = 0; // first -> second
         float tangentImpulse = 0;
+        float normalVelocityBias = 0.0f;
 
         Math::Vector2 point = Math::Vector2::zero;
         Math::Vector2 normal = Math::Vector2::zero; // first -> second
@@ -33,6 +34,7 @@ namespace Core::Solver
         void SetRigidbody(SolverRigidbody* first, SolverRigidbody* second);
         void SetContact(const Collider& first, const Collider& second);
 
+        void InitVelocityBias();
         void ApplyNormalImpulse();
         void ApplyTangentImpulse(float step);
 
