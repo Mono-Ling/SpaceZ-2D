@@ -22,8 +22,8 @@ namespace Core::Collision
         {
             p.isCollision = false;
             CollisionDetection(p);
-            if(p.isCollision)
-                _pairs.push_back(p.collisionPair);
+            
+            ContactManifold(p, _pairs);
         }
     }
     const vector<CollisionPair>& NarrowPhase::GetCollisionPairs() const
@@ -96,5 +96,75 @@ namespace Core::Collision
         auto wSecond = second.SurfacePoint(-normal);
         p.anchorPoint = {first.PointWorldToLocalRT(wFirst), second.PointWorldToLocalRT(wSecond)};
         p.point = (wFirst + wSecond) / 2.0f;
+    }
+    void NarrowPhase::ContactManifold(NarrowPhaseDetectPair& p, vector<CollisionPair>& ans)
+    {
+        if(!p.isCollision)
+            return;
+        auto point = p.collisionPair.point;
+        auto normal = p.collisionPair.normal.Normalized();
+        auto tangent = normal.Perp();
+
+        auto lineA = p.first.GetEdge(-normal);
+        auto lineB = p.second.GetEdge(normal);
+
+        pair<Vector2, Vector2> lineAT
+        {
+            lineA.first.ProjectionPoint(point, tangent),
+            lineA.second.ProjectionPoint(point, tangent)
+        };
+        pair<Vector2, Vector2> lineBT
+        {
+            lineB.first.ProjectionPoint(point, tangent),
+            lineB.second.ProjectionPoint(point, tangent)
+        };
+
+        pair<float, float> lineAOffset
+        {
+            Dot(lineAT.first - point, tangent),
+            Dot(lineAT.second - point, tangent)
+        };
+        pair<float, float> lineBOffset
+        {
+            Dot(lineBT.first - point, tangent),
+            Dot(lineBT.second - point, tangent)
+        };
+
+        if(lineAOffset.first > lineAOffset.second)
+            swap(lineAOffset.first, lineAOffset.second);
+        if(lineBOffset.first > lineBOffset.second)
+            swap(lineBOffset.first, lineBOffset.second);
+
+        if(lineAOffset.first > lineBOffset.second
+        || lineBOffset.first > lineAOffset.second)
+        {
+            ans.push_back(p.collisionPair);
+            return;
+        }
+
+        pair<Vector2, Vector2> line
+        {
+            tangent * Max(lineAOffset.first, lineBOffset.first) + point,
+            tangent * Min(lineAOffset.second, lineBOffset.second) + point
+        };
+
+        p.collisionPair.point = line.first;
+        p.collisionPair.anchorPoint = 
+        {
+            p.first.PointWorldToLocalRT(line.first.ProjectionPoint(lineA.first, (lineA.first - lineA.second))),
+            p.second.PointWorldToLocalRT(line.first.ProjectionPoint(lineB.first, (lineB.first - lineB.second)))
+        };
+        ans.push_back(p.collisionPair);
+
+        if(line.first == line.second)
+            return;
+
+        p.collisionPair.point = line.second;
+        p.collisionPair.anchorPoint = 
+        {
+            p.first.PointWorldToLocalRT(line.second.ProjectionPoint(lineA.first, (lineA.first - lineA.second))),
+            p.second.PointWorldToLocalRT(line.second.ProjectionPoint(lineB.first, (lineB.first - lineB.second)))
+        };
+        ans.push_back(p.collisionPair);
     }
 }

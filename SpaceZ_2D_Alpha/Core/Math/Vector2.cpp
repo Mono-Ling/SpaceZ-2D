@@ -58,6 +58,11 @@ namespace Core::Math
     {
         return *this - ProjectionVector(axis);
     }
+    Vector2 Vector2::ProjectionPoint(const Vector2& origin, const Vector2& axis) const
+    {
+        auto offset = (*this - origin).ProjectionVector(axis);
+        return origin + offset;
+    }
     Vector2 Vector2::Perp() const
     {
         return Vector2(-y, x);

@@ -21,5 +21,6 @@ namespace Core::Collision
         bool CompleteSimplex(const ConvexDetectReq& first, const ConvexDetectReq& second, Simplex& simplex);
         bool GJK(const ConvexDetectReq& first, const ConvexDetectReq& second, Simplex& simplex);
         void EPA(const ConvexDetectReq& first, const ConvexDetectReq& second, const Simplex& simplex, CollisionPair& p);
+        void ContactManifold(NarrowPhaseDetectPair& p, std::vector<CollisionPair>& ans);
     };
 }

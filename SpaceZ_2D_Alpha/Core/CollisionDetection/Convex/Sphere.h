@@ -15,5 +15,10 @@ namespace Core::Collision
         {
             return dir.Normalized() * _radius;
         }
+        inline std::pair<Math::Vector2, Math::Vector2> GetEdgeLocal(const Math::Vector2& normal) const override
+        {
+            auto sup = SupportLocal(-normal);
+            return { sup, sup };
+        }
     };
 }

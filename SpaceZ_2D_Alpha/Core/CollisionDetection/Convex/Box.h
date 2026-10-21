@@ -36,5 +36,32 @@ namespace Core::Collision
             float ty = Math::Abs(d.y) > Math::Epsilon ? _extents.y / Math::Abs(d.y) : Math::Infinity;
             return d * Math::Min(tx, ty);
         }
+        inline std::pair<Math::Vector2, Math::Vector2> GetEdgeLocal(const Math::Vector2& normal) const override
+        {
+            auto surface = SurfacePointLocal(-normal);
+            Math::Vector2 A(-_extents.x, _extents.y);
+            Math::Vector2 B(_extents.x, _extents.y);
+            Math::Vector2 C(_extents.x, -_extents.y);
+            Math::Vector2 D(-_extents.x, -_extents.y);
+
+            if(surface == A || surface == B || surface == C || surface == D)
+                return { surface, surface };
+            
+            if(Math::Abs(normal.x) > Math::Abs(normal.y))
+            {
+                auto sign = normal.x > 0 ? -1.0f : 1.0f;
+                return
+                { 
+                    { sign * _extents.x, _extents.y },
+                    { sign * _extents.x, -_extents.y }
+                };
+            }
+            auto sign = normal.y > 0 ? -1.0f : 1.0f;
+            return
+            { 
+                { _extents.x, sign * _extents.y },
+                { -_extents.x, sign * _extents.y }
+            };
+        }
     };
 }

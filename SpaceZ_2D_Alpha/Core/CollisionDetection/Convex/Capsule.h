@@ -44,5 +44,18 @@ namespace Core::Collision
             float t = dy * halfH + Math::Sqrt(disc);
             return d * t;
         }
+        inline std::pair<Math::Vector2, Math::Vector2> GetEdgeLocal(
+            const Math::Vector2& normal) const override
+        {
+            auto n = normal.Normalized();
+            float halfH = _height / 2.0f;
+            if (Math::Abs(n.y) < Math::Epsilon)
+            {
+                float x = n.x > 0 ? -_radius : _radius;
+                return {{x, halfH}, {x, -halfH}};
+            }
+            auto sup = SupportLocal(-n);
+            return {sup, sup};
+        }
     };
 }

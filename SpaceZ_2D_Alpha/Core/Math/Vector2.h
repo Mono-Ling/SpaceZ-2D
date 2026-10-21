@@ -21,6 +21,7 @@ namespace Core::Math
         Vector2 Normalized() const;
         Vector2 ProjectionVector(const Vector2& axis) const;
         Vector2 RejectionVector(const Vector2& axis) const;
+        Vector2 ProjectionPoint(const Vector2& origin, const Vector2& axis) const;
 
         Vector2 Perp() const;
 

@@ -2,6 +2,7 @@
 #include "CollisionDetection/Convex/Convex.h"
 #include "Math/Matrix3x3.h"
 #include "Math/Vector2.h"
+#include <utility>
 
 namespace Core::Collision
 {
@@ -28,6 +29,15 @@ namespace Core::Collision
             if(!_convex)
                 return Math::Vector2::zero;
             return _convex->SurfacePoint(dir, _worldToLocal, _localToWorld);
+        }
+        /// @brief 获取边
+        /// @param normal 法线（向内）
+        /// @return 
+        inline std::pair<Math::Vector2, Math::Vector2> GetEdge(const Math::Vector2& normal) const
+        {
+            if(!_convex)
+                return {Math::Vector2::zero, Math::Vector2::zero};
+            return _convex->GetEdge(normal, _worldToLocal, _localToWorld);
         }
         inline Math::Vector2 WorldPosition() const
         {
