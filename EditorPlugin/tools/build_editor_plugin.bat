@@ -7,18 +7,33 @@ REM  Recursively compile EditorPlugin into ONE DLL (STANDALONE,
 REM  does NOT link or include Core) and copy to:
 REM    <UnityRoot>\Assets\Plugins\x86_64\EditorPlugin.dll
 REM  Debug PDB goes to .build\ (kept out of Unity assets).
-REM  Intermediates: .build\obj_editor_plugin\ (cleaned by clean.bat)
+REM  Intermediates: .build\obj_editor_plugin\ (cleaned by tools\clean.bat)
 REM  NOTE: objects are flattened by source base name, so do NOT
 REM        use the same .cpp file name in different sub-folders.
+REM
+REM  This project is STANDALONE: it does not include or link anything
+REM  from other C++ projects in this Unity project. The only outward
+REM  relation is the DLL being copied into the Unity assets folder,
+REM  so the Unity project root must be the PARENT of this folder.
+REM
+REM  Layout:
+REM    <UnityRoot>\                       Unity project root
+REM    <UnityRoot>\Assets\Plugins\x86_64\ DLL output
+REM    <UnityRoot>\EditorPlugin\          THIS project root
+REM    <UnityRoot>\EditorPlugin\tools\    this script
 REM ============================================================
 
 REM ---- Locate directories (script lives in tools\, project root is one level up) ----
-for %%i in ("%~dp0..") do set "ALPHA_ROOT=%%~fi"
-for %%i in ("%ALPHA_ROOT%\..") do set "UNITY_ROOT=%%~fi"
+for %%i in ("%~dp0..") do set "PLUGIN_ROOT=%%~fi"
+for %%i in ("%PLUGIN_ROOT%\..") do set "UNITY_ROOT=%%~fi"
 
-set "SRC_DIR=%ALPHA_ROOT%\EditorPlugin"
+REM ---- Layout guard: never write the DLL to a made-up path ----
+if not exist "%UNITY_ROOT%\Assets" goto :bad_layout
+if not exist "%UNITY_ROOT%\ProjectSettings" goto :bad_layout
+
+set "SRC_DIR=%PLUGIN_ROOT%"
 set "OUT_DIR=%UNITY_ROOT%\Assets\Plugins\x86_64"
-set "BUILD_DIR=%ALPHA_ROOT%\.build"
+set "BUILD_DIR=%PLUGIN_ROOT%\.build"
 set "OBJ_DIR=%BUILD_DIR%\obj_editor_plugin"
 set "DLL_NAME=EditorPlugin.dll"
 set "PDB_NAME=%DLL_NAME:.dll=.pdb%"
@@ -92,3 +107,8 @@ if errorlevel 1 (
 
 echo [DONE] Generated %OUT_DIR%\%DLL_NAME%
 exit /b 0
+
+:bad_layout
+echo [ERROR] Unity project root not found at "%UNITY_ROOT%".
+echo         Expected "EditorPlugin" to sit next to Assets\ and ProjectSettings\.
+exit /b 1

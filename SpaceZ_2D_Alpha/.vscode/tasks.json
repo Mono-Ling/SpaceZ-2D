@@ -30,20 +30,6 @@
             "detail": "递归编译 Core 与 Main，链接为控制台程序输出至 Main/Debug"
         },
         {
-            "label": "构建编辑器插件 DLL (EditorPlugin)",
-            "type": "shell",
-            "command": "${workspaceFolder}\\tools\\build_editor_plugin.bat",
-            "args": [],
-            "group": "build",
-            "problemMatcher": "$msCompile",
-            "presentation": {
-                "reveal": "always",
-                "panel": "shared",
-                "clear": true
-            },
-            "detail": "递归编译 EditorPlugin，独立链接为 EditorPlugin.dll（不依赖 Core）输出至 Assets/Plugins/x86_64"
-        },
-        {
             "label": "构建求解器测试 (Core+Tests)",
             "type": "shell",
             "command": "${workspaceFolder}\\tools\\build_tests.bat",
@@ -62,7 +48,6 @@
             "dependsOn": [
                 "构建 Unity 插件 DLL (Core+UnityPlugin)",
                 "构建控制台程序 (Core+Main)",
-                "构建编辑器插件 DLL (EditorPlugin)",
                 "构建求解器测试 (Core+Tests)"
             ],
             "dependsOrder": "sequence",
@@ -71,7 +56,7 @@
                 "isDefault": false
             },
             "problemMatcher": "$msCompile",
-            "detail": "依次构建插件 DLL、控制台程序、编辑器插件 DLL 与求解器测试"
+            "detail": "依次构建插件 DLL、控制台程序与求解器测试"
         },
         {
             "label": "清理编译产物",

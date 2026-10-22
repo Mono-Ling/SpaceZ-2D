@@ -1,0 +1,37 @@
+{
+    // EditorPlugin 独立工程的构建任务：逻辑全部在 tools/build_editor_plugin.bat
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "构建 EditorPlugin DLL (Debug x64)",
+            "type": "shell",
+            "command": "${workspaceFolder}\\tools\\build_editor_plugin.bat",
+            "args": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": "$msCompile",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            },
+            "detail": "编译本工程全部 cpp，独立链接为 EditorPlugin.dll（不包含、不链接 Core），输出至 <Unity工程根>/Assets/Plugins/x86_64"
+        },
+        {
+            "label": "清理编译产物",
+            "type": "shell",
+            "command": "${workspaceFolder}\\tools\\clean.bat",
+            "args": [],
+            "group": "none",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            },
+            "detail": "删除本工程 .build/ 中间目录与 Assets/Plugins/x86_64 下的 EditorPlugin.dll（含 Unity 生成的同名 .meta）"
+        }
+    ]
+}

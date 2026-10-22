@@ -1,0 +1,14 @@
+{
+    // 只隐藏编译中间目录，不要把 *.dll / *.obj 之类的广谱规则加进来
+    "files.exclude": {
+        "**/.build": true
+    },
+    "search.exclude": {
+        "**/.build": true
+    },
+    "files.encoding": "utf8",
+    "files.eol": "\r\n",
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+    "C_Cpp.default.cppStandard": "c++20"
+}

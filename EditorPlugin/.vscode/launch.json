@@ -1,0 +1,14 @@
+{
+    // 本工程产物是 DLL，没有可执行入口，只能 attach 到已经加载它的进程（Unity Editor）
+    // symbolSearchPath 必须指向 .build：DLL 落在 Assets/Plugins/x86_64，pdb 却写在 .build（避免污染 Unity 资产）
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "附加到 Unity (调试 EditorPlugin.dll)",
+            "type": "cppvsdbg",
+            "request": "attach",
+            "processId": "${command:pickProcess}",
+            "symbolSearchPath": "${workspaceFolder}/.build"
+        }
+    ]
+}

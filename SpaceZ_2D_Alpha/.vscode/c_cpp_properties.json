@@ -7,7 +7,6 @@
             "includePath": [
                 "${workspaceFolder}/Core",
                 "${workspaceFolder}/UnityPlugin",
-                "${workspaceFolder}/EditorPlugin",
                 "${workspaceFolder}/Main",
                 "${workspaceFolder}/Tests"
             ],

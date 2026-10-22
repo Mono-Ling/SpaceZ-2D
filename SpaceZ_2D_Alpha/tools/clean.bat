@@ -3,13 +3,13 @@ setlocal EnableExtensions
 title Clean Build Artifacts - SpaceZ_2D_Alpha
 
 REM ============================================================
-REM  Remove ALL build intermediates and outputs:
-REM    1. .build\            (objects / response files / import libs)
-REM    2. Main\Debug\        (exe / pdb / ilk)
-REM    3. Tests\Debug\       (test exe / pdb / ilk)
-REM    4. Assets\Plugins\x86_64\ (SpaceZ_2D_Alpha.dll, EditorPlugin.dll
-REM       and their pdb, plus Unity's same-name .meta)
-REM  Only files produced by the build scripts are deleted.
+REM  Remove ALL build intermediates and outputs of THIS project:
+REM    1. .build\                (objects / response files / import libs)
+REM    2. Main\Debug\            (exe / pdb / ilk)
+REM    3. Tests\Debug\           (test exe / pdb / ilk)
+REM    4. Assets\Plugins\x86_64\SpaceZ_2D_Alpha.dll (+ .pdb, + .meta)
+REM  Only files produced by this project's build scripts are deleted.
+REM  Sibling C++ projects are NOT touched: each owns its own clean script.
 REM ============================================================
 
 REM ---- Locate directories (script lives in tools\, project root is one level up) ----
@@ -21,7 +21,6 @@ set "OUT_CONSOLE=%ALPHA_ROOT%\Main\Debug"
 set "OUT_TESTS=%ALPHA_ROOT%\Tests\Debug"
 set "BUILD_DIR=%ALPHA_ROOT%\.build"
 set "DLL_NAME=SpaceZ_2D_Alpha.dll"
-set "DLL_EDITOR=EditorPlugin.dll"
 set "EXE_NAME=SpaceZ_2D_Alpha.exe"
 set "PDB_EXE=%EXE_NAME:.exe=.pdb%"
 set "EXE_TESTS=SpaceZ_SolverTests.exe"
@@ -52,9 +51,7 @@ REM ---- 4. Unity plugin output (including Unity's same-name .meta) ----
 if exist "%OUT_PLUGINS%" (
     del /q "%OUT_PLUGINS%\%DLL_NAME%" 2>nul
     del /q "%OUT_PLUGINS%\%DLL_NAME%.meta" 2>nul
-    del /q "%OUT_PLUGINS%\%DLL_EDITOR%" 2>nul
-    del /q "%OUT_PLUGINS%\%DLL_EDITOR%.meta" 2>nul
-    echo [CLEANED] Assets\Plugins\x86_64\ dll files including .meta
+    echo [CLEANED] Assets\Plugins\x86_64\SpaceZ_2D_Alpha.dll including .meta
 )
 
 echo [DONE] Clean finished.

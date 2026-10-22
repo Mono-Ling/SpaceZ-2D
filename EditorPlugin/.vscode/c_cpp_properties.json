@@ -1,0 +1,21 @@
+{
+    // IntelliSense 配置：与 tools/build_editor_plugin.bat 的 MSVC Debug x64 编译选项保持一致
+    // 本工程独立编译，不包含 Core，因此只以工程根为头文件基准
+    "version": 4,
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "cStandard": "c17",
+            "cppStandard": "c++20",
+            "intelliSenseMode": "windows-msvc-x64"
+        }
+    ]
+}
