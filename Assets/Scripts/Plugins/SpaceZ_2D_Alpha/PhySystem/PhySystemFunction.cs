@@ -53,6 +53,9 @@ namespace SpaceZ_2D.Alpha
         public unsafe delegate void SetBodies(BodyMassInfo* infos, int count);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public unsafe delegate void SetBodiesDrag(BodyDragInfo* infos, int count);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public unsafe delegate void SetBodiesVelocity(BodyVelocityInfo* infos, int count);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]

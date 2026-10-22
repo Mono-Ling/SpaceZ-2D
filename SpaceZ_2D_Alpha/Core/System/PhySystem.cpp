@@ -108,6 +108,14 @@ namespace Core
         body->mass = Max(Epsilon, mass);
         body->inertia = Max(Epsilon, inertia);
     }
+    void PhySystem::SetBodyDrag(const RigidbodyHandle& handle, float lDrag, float aDrag)
+    {
+        auto body = TryGetBody(handle);
+        if(!body)
+            return;
+        body->linearDrag = Clamp01(lDrag);
+        body->angularDrag = Clamp01(aDrag);
+    }
     void PhySystem::SetVelocity(const RigidbodyHandle& handle, const Vector2& lv, float av)
     {
         auto body = TryGetBody(handle);

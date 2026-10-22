@@ -60,6 +60,31 @@ namespace SpaceZ_2D.Alpha
                 }
             }
 
+            public float LinearDrag
+            {
+                get => _linearDrag;
+                set
+                {
+                    value = Mathf.Clamp01(value);
+                    if(value == _linearDrag)
+                        return;
+                    SetBodyDrag(value, _angularDrag);
+                    _linearDrag = value;
+                }
+            }
+            public float AngularDrag
+            {
+                get => _angularDrag;
+                set
+                {
+                    value = Mathf.Clamp01(value);
+                    if(value == _angularDrag)
+                        return;
+                    SetBodyDrag(_linearDrag, value);
+                    _angularDrag = value;
+                }
+            }
+
             private float _angularVelocity;
             private Vector2 _linearVelocity;
             [SerializeField]
@@ -67,12 +92,18 @@ namespace SpaceZ_2D.Alpha
             [SerializeField]
             private float _inertia = 1f;
 
+            [SerializeField]
+            private float _linearDrag;
+            [SerializeField]
+            private float _angularDrag = 0.05f;
+
             private (Vector2 pos, float rot, Vector2 scale) _preTransform;
 
             void Awake()
             {
                 CreateBody();
                 SetBody(_mass, _inertia);
+                SetBodyDrag(_linearDrag, _angularDrag);
             }
             public void OnPhyUpdate()
             {
@@ -134,6 +165,17 @@ namespace SpaceZ_2D.Alpha
                     handle = _handle,
                     mass = mass,
                     inertia = inertia,
+                });
+            }
+            private void SetBodyDrag(float lDrag, float aDrag)
+            {
+                if(!IsEnable(_bodies))
+                    return;
+                _bodyDragBuffer.Add(new()
+                {
+                    handle = _handle,
+                    linearDrag = lDrag,
+                    angularDrag = aDrag,
                 });
             }
             private void SetVelocity(Vector2 lv, float av)

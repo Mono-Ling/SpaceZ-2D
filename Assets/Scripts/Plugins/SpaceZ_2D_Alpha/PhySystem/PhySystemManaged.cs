@@ -14,6 +14,7 @@ namespace SpaceZ_2D.Alpha
         private static Dictionary<Handle, HashSet<Handle>> _dynamicColliderMap = new();
 
         private static ReadOnlyNativeBuffer<BodyMassInfo> _bodyMassBuffer = new();
+        private static ReadOnlyNativeBuffer<BodyDragInfo> _bodyDragBuffer = new();
         private static ReadOnlyNativeBuffer<BodyVelocityInfo> _bodyVelBuffer = new();
         private static ReadOnlyNativeBuffer<ColliderMaterialInfo> _colliderMatBuffer = new();
         private static ReadOnlyNativeBuffer<ColliderTransformInfo> _colliderTransformBuffer = new();
@@ -35,6 +36,7 @@ namespace SpaceZ_2D.Alpha
             StartEngine(SUB_STEP_COUNT, ITERATION);
 
             _bodyMassBuffer.Init();
+            _bodyDragBuffer.Init();
             _bodyVelBuffer.Init();
             _colliderMatBuffer.Init();
             _colliderTransformBuffer.Init();
@@ -58,6 +60,7 @@ namespace SpaceZ_2D.Alpha
             StopEngine();
 
             _bodyMassBuffer.Dispose();
+            _bodyDragBuffer.Dispose();
             _bodyVelBuffer.Dispose();
             _colliderMatBuffer.Dispose();
             _colliderTransformBuffer.Dispose();
@@ -95,6 +98,7 @@ namespace SpaceZ_2D.Alpha
             unsafe
             {
                 _bodyMassBuffer.SyncAndClear(SetBodies);
+                _bodyDragBuffer.SyncAndClear(SetBodiesDrag);
                 _bodyVelBuffer.SyncAndClear(SetBodiesVelocity);
                 _colliderMatBuffer.SyncAndClear(SetColliders);
                 _colliderTransformBuffer.SyncAndClear(SetCollidersTransform);

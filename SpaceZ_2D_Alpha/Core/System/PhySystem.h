@@ -45,6 +45,7 @@ namespace Core
         void DestroyCollider(const ColliderHandle& handle);
 
         void SetBody(const RigidbodyHandle& handle, float mass, float inertia);
+        void SetBodyDrag(const RigidbodyHandle& handle, float lDrag, float aDrag);
         void SetVelocity(const RigidbodyHandle& handle, const MAT Vector2& lv, float av);
 
         void SetCollider(const ColliderHandle& handle, float sf, float df, float e);

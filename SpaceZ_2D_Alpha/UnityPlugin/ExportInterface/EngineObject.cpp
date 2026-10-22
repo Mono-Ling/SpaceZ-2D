@@ -92,6 +92,24 @@ EXPORT_FUNCTION void SetBodies(ObjectInfo<Rigidbody, pair<float, float>>* infos,
         "刚体信息设置异常"
     );
 }
+/// @brief 设置刚体阻尼
+/// @param infos 刚体阻尼数据数组(handle, linearDrag, angularDrag)
+/// @param count 数组长度
+/// @return 
+EXPORT_FUNCTION void SetBodiesDrag(ObjectInfo<Rigidbody, pair<float, float>>* infos, int count)
+{
+    if(!IsEngineAvailable() || !infos || count <= 0)
+        return;
+    TRY_CATCH_DEBUG
+    (
+        {
+            for(int i = 0; i < count; i++)
+                phySystemPtr->SetBodyDrag(infos[i].handle, infos[i].info.first, infos[i].info.second);
+        },
+        "物理对象",
+        "刚体阻尼设置异常"
+    );
+}
 /// @brief 设置刚体速度
 /// @param infos 刚体速度数组(handle, linearV, angularV)
 /// @param count 数组长度

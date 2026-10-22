@@ -35,6 +35,7 @@ namespace SpaceZ_2D.Alpha
 
         #region 数据批量同步
         private static SetBodies _setBodies;
+        private static SetBodiesDrag _setBodiesDrag;
         private static SetBodiesVelocity _setBodiesVelocity;
         private static SetColliders _setColliders;
         private static SetBodiesTransform _setBodiesTransform;
@@ -71,6 +72,7 @@ namespace SpaceZ_2D.Alpha
                 _nativeLoader.GetFunction(typeof(SetColliderBody).Name, out _setColliderBody);
 
                 _nativeLoader.GetFunction(typeof(SetBodies).Name, out _setBodies);
+                _nativeLoader.GetFunction(typeof(SetBodiesDrag).Name, out _setBodiesDrag);
                 _nativeLoader.GetFunction(typeof(SetBodiesVelocity).Name, out _setBodiesVelocity);
                 _nativeLoader.GetFunction(typeof(SetColliders).Name, out _setColliders);
                 _nativeLoader.GetFunction(typeof(SetBodiesTransform).Name, out _setBodiesTransform);
@@ -108,6 +110,7 @@ namespace SpaceZ_2D.Alpha
             _setColliderBody = null;
 
             _setBodies = null;
+            _setBodiesDrag = null;
             _setBodiesVelocity = null;
             _setColliders = null;
             _setBodiesTransform = null;
@@ -145,6 +148,8 @@ namespace SpaceZ_2D.Alpha
         #region 数据批量同步
         private static unsafe void SetBodies(BodyMassInfo* infos, int count)
         => _setBodies?.Invoke(infos, count);
+        private static unsafe void SetBodiesDrag(BodyDragInfo* infos, int count)
+        => _setBodiesDrag?.Invoke(infos, count);
         private static unsafe void SetBodiesVelocity(BodyVelocityInfo* infos, int count)
         => _setBodiesVelocity?.Invoke(infos, count);
         private static unsafe void SetColliders(ColliderMaterialInfo* infos, int count)
@@ -196,6 +201,8 @@ namespace SpaceZ_2D.Alpha
 
         [DllImport(PLUGIN_NAME, EntryPoint = "SetBodies")]
         private extern static unsafe void SetBodies(BodyMassInfo* infos, int count);
+        [DllImport(PLUGIN_NAME, EntryPoint = "SetBodiesDrag")]
+        private extern static unsafe void SetBodiesDrag(BodyDragInfo* infos, int count);
         [DllImport(PLUGIN_NAME, EntryPoint = "SetBodiesVelocity")]
         private extern static unsafe void SetBodiesVelocity(BodyVelocityInfo* infos, int count);
         [DllImport(PLUGIN_NAME, EntryPoint = "SetColliders")]

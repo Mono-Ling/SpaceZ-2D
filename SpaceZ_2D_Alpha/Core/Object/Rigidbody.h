@@ -14,8 +14,10 @@ namespace Core
         float mass = 1.0f;
         float inertia = 1.0f;
 
-        float angularVelocity = 0.0f;
+        float linearDrag = 0.0f;
+        float angularDrag = 0.05f;
 
+        float angularVelocity = 0.0f;
         Math::Vector2 linearVelocity;
 
         float torque = 0.0f;
@@ -39,6 +41,9 @@ namespace Core
 
         inline void Step(float dt)
         {
+            linearVelocity *= std::exp(-linearDrag * dt);
+            angularVelocity *= std::exp(-angularDrag * dt);
+
             auto dx = linearVelocity * dt;
             auto da = angularVelocity * dt;
             _transform.SetWorldPosition(_transform.WorldPosition() + dx);
