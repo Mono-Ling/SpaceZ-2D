@@ -16,18 +16,21 @@ Unity 侧只做组件封装与无分配数据封送。
 
 ## 特性
 
-**碰撞检测**
+## 碰撞检测
+
 - 宽相：动态平衡 BVH，插入时按「最优兄弟节点 + 高度代价」选择合并对象，脏碰撞体增量同步（`SynBreadthPhase`）。
 - 窄相：GJK 求最近点 / 相交，EPA 求穿透深度与法线（`MaxIteration = 36`）。
 - 接触流形：同一对凸体可生成多个接触点（`ContactManifold`），而不是单点近似。
 - 支撑函数统一走 `Support(dir, worldToLocal, localToWorld)`，旋转/缩放由变换矩阵承担，形状本身始终在局部空间。
 
-**物理求解**
+## 物理求解
+
 - 岛划分：并查集把碰撞对切成互不影响的连通分量，逐岛独立迭代。
 - 每个接触点：法向冲量（含恢复系数速度偏置）+ 切向冲量（静摩擦钳制 / 动摩擦），迭代后再做位置修正（松弛系数 + 穿透容差）。
 - 积分：半隐式欧拉，阻尼用指数衰减 `v *= exp(-drag * dt)`，按子步推进（默认 4 子步 × 8 次迭代）。
 
-**接口与工程性**
+## 接口与工程性
+
 - 句柄为 `{int32 id, int32 generation}`，对象删除后代数自增，旧句柄可被检出而非野指针。
 - Unity 侧批量封送：属性写入先进 `NativeList` 缓冲，每物理帧一次性 flush 到原生侧（`SyncAndClear`），回写也走同一块缓冲 —— 避免逐字段 P/Invoke 与 GC。
 - 编辑器内走 `LoadLibrary` + 函数指针（`NativeLoader`），重编 DLL 后即可热重载，无需重启 Unity；Player 走静态 `DllImport` 分支。
@@ -36,7 +39,7 @@ Unity 侧只做组件封装与无分配数据封送。
 
 ## 目录结构
 
-```
+```file
 SpaceZ-2D/
 ├─ Assets/
 │  ├─ Plugins/x86_64/                 SpaceZ_2D_Alpha.dll（物理内核）、EditorPlugin.dll（编辑器桥）
@@ -77,9 +80,7 @@ SpaceZ-2D/
    └─ EditorPluginLoad.cpp            UnityPluginLoad/Unload + GetUnityInterface
 ```
 
-> 两个 C++ 工程平级且**互不耦合**：各自的 `.vscode/`、`tools/`、`.build/`、`.gitignore` 完全独立，互不转调、互不清理。
-> `EditorPlugin` 唯一的外部关系是把 DLL 拷进 `Assets/Plugins/x86_64/`。
-> **新增原生代码一律进 `EditorPlugin/`**；`SpaceZ_2D_Alpha/` 只做冻结维护。
+> 三个 C++ 工程平级且**互不耦合**：各自的 `.vscode/`、`tools/`、`.build/`、`.gitignore` 完全独立，互不转调、互不清理。
 
 ---
 
@@ -87,7 +88,7 @@ SpaceZ-2D/
 
 Unity 侧每物理帧（`PhyLateUpdate`，节流 `PhyTime.DELAY_FRAME = 0.02s`，名义 50 Hz）：
 
-```
+```step
 PhySystemManaged.Step()
  ├─ ComponentUpdate()    各组件把 Transform 变化写入对应缓冲
  ├─ SyncDirtyData()      缓冲 flush 到原生侧（质量/阻尼/速度/材质/变换/形状/力）
@@ -97,7 +98,7 @@ PhySystemManaged.Step()
 
 原生侧 `PhySystem::Step(dt)`：
 
-```
+```step
 清空脏刚体集合
 消费一次外部力 / 力矩（dt 全量）
 循环 subStep 次（默认 4）：
@@ -235,7 +236,7 @@ C# 侧 `Assets/Scripts/Plugins/SpaceZ_2D_Alpha/Native/*.cs` 与 C++ 侧
 
 ---
 
-## 已知限制
+## Alpha已知限制
 
 - **堆叠稳定**：Alpha版本受限于接触流形（多接触点）顺序耦合，会每帧产生微小正冲量矩；碰撞盒堆叠尤为明显
 - **平台**：只支持 Windows x64，且构建产物为 Debug。`PluginUtility` 仅在 `UNITY_EDITOR_64` 下返回 DLL 路径，Player 构建走静态 `DllImport` 分支，尚未实测打包链路。
@@ -245,3 +246,11 @@ C# 侧 `Assets/Scripts/Plugins/SpaceZ_2D_Alpha/Native/*.cs` 与 C++ 侧
 - **退化情形**：GJK/EPA 迭代上限用尽时与「真分离」共用 `return false`，极端配置下可能漏检；穿透深度小于 `Epsilon`(1e-5) 一律判分离，恰相切不产生接触。
 - `Main/main.cpp` 仍是 Hello World 占位，控制台目标目前只用于跑 Core。
 - `Tests/` 是自写控制台用例，未接入 Unity Test Framework。
+
+---
+
+## 开发计划
+
+- **Alpha**：全量离散碰撞检测物理引擎；闭环物理引擎核心循环，验证物理求解与引擎核心架构。（已完成）
+- **Exp-CCD**：全量连续碰撞检测物理引擎；在Alpha暴露物理求解架构问题上优化，验证连续碰撞检测实现方案。
+- **Beta**：采用离散为主连续为辅的物理引擎；引入碰撞层剔除、空间查询等通用API，实现最小可用版本

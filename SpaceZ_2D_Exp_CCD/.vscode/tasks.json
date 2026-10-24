@@ -1,0 +1,99 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "构建 Unity 插件 DLL (Core+UnityPlugin)",
+            "type": "shell",
+            "command": "${workspaceFolder}\\tools\\build_plugins.bat",
+            "args": [],
+            "group": "build",
+            "problemMatcher": "$msCompile",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            },
+            "detail": "递归编译 Core 与 UnityPlugin，链接为单个 SpaceZ_2D_Exp_CCD.dll 输出至 Assets/Plugins/x86_64"
+        },
+        {
+            "label": "构建控制台程序 (Core+Main)",
+            "type": "shell",
+            "command": "${workspaceFolder}\\tools\\build_console.bat",
+            "args": [],
+            "group": "build",
+            "problemMatcher": "$msCompile",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            },
+            "detail": "递归编译 Core 与 Main，链接为控制台程序输出至 Main/Debug"
+        },
+        {
+            "label": "构建测试程序 (Core+Tests)",
+            "type": "shell",
+            "command": "${workspaceFolder}\\tools\\build_tests.bat",
+            "args": [],
+            "group": "build",
+            "problemMatcher": "$msCompile",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            },
+            "detail": "递归编译 Core 与 Tests，链接为测试程序输出至 Tests/Debug（不进入 Unity 插件目录）"
+        },
+        {
+            "label": "构建全部",
+            "dependsOn": [
+                "构建 Unity 插件 DLL (Core+UnityPlugin)",
+                "构建控制台程序 (Core+Main)",
+                "构建测试程序 (Core+Tests)"
+            ],
+            "dependsOrder": "sequence",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": "$msCompile",
+            "detail": "依次构建插件 DLL、控制台程序与测试程序"
+        },
+        {
+            "label": "清理编译产物",
+            "type": "shell",
+            "command": "${workspaceFolder}\\tools\\clean.bat",
+            "args": [],
+            "group": "none",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            },
+            "detail": "删除 .build 中间目录、Main/Debug 与 Tests/Debug 产物、Assets/Plugins/x86_64 下的 DLL"
+        },
+        {
+            "type": "cppbuild",
+            "label": "C/C++: cl.exe 生成活动文件",
+            "command": "cl.exe",
+            "args": [
+                "/Zi",
+                "/EHsc",
+                "/nologo",
+                "/Fe${fileDirname}\\${fileBasenameNoExtension}.exe",
+                "${file}"
+            ],
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "problemMatcher": [
+                "$msCompile"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "detail": "单文件快速编译（需要当前 shell 已具备 MSVC 环境，否则请用上面的正式构建任务）"
+        }
+    ]
+}
