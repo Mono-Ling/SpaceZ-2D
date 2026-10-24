@@ -1,0 +1,18 @@
+{
+    // 控制台程序（Core+Main）的运行/调试配置
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "运行控制台程序 (Core+Main)",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/Main/Debug/SpaceZ_2D_Exp_CCD.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/Main/Debug",
+            "environment": [],
+            "console": "integratedTerminal",
+            "preLaunchTask": "构建控制台程序 (Core+Main)"
+        }
+    ]
+}
