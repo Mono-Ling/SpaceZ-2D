@@ -79,6 +79,19 @@ namespace Core::Math
     {
         return (a - b).Length();
     }
+    float Dot(const Vector3& a, const Vector3& b)
+    {
+        return a.x * b.x + a.y * b.y + a.z * b.z;
+    }
+    Vector3 Cross(const Vector3& a, const Vector3& b)
+    {
+        return Vector3
+        (
+            a.y * b.z - a.z * b.y,
+            a.z * b.x - a.x * b.z,
+            a.x * b.y - a.y * b.x
+        );
+    }
 
     template<>
     Vector3 Lerp<Vector3>(const Vector3& start, const Vector3& end, float t)

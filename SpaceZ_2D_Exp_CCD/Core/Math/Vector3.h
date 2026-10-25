@@ -35,20 +35,6 @@ namespace Core::Math
     inline constexpr Vector3 Vector3::right   = Vector3(1.0f, 0.0f, 0.0f);
     inline constexpr Vector3 Vector3::forward = Vector3(0.0f, 0.0f, 1.0f);
 
-    constexpr float Dot(const Vector3& a, const Vector3& b)
-    {
-        return a.x * b.x + a.y * b.y + a.z * b.z;
-    }
-    constexpr Vector3 Cross(const Vector3& a, const Vector3& b)
-    {
-        return Vector3
-        (
-            a.y * b.z - a.z * b.y,
-            a.z * b.x - a.x * b.z,
-            a.x * b.y - a.y * b.x
-        );
-    }
-
     bool operator==(const Vector3& a, const Vector3& b);
     bool operator!=(const Vector3& a, const Vector3& b);
     Vector3 operator+(const Vector3& a, const Vector3& b);
@@ -57,6 +43,8 @@ namespace Core::Math
     Vector3 operator*(float scalar, const Vector3& v);
     Vector3 operator/(const Vector3& v, float scalar);
     float Distance(const Vector3& a, const Vector3& b);
+    float Dot(const Vector3& a, const Vector3& b);
+    Vector3 Cross(const Vector3& a, const Vector3& b);
 
     template<>
     Vector3 Lerp<Vector3>(const Vector3& start, const Vector3& end, float t);

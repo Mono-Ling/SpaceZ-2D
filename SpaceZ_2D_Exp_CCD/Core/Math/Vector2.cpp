@@ -95,6 +95,14 @@ namespace Core::Math
     {
         return (b - a).Length();
     }
+    float Dot(const Vector2& a, const Vector2& b)
+    {
+        return a.x * b.x + a.y * b.y;
+    }
+    float Cross(const Vector2& a, const Vector2& b)
+    {
+        return a.x * b.y - a.y * b.x;
+    }
     bool IsCollinear(const Vector2& a, const Vector2& b, const Vector2& c)
     {
         return Abs(Cross(b - a, c - a)) < Epsilon;

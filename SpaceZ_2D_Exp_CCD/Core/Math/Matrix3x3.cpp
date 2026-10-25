@@ -74,6 +74,22 @@ namespace Core::Math
             Dot(m.Row<2>(), v),
         };
     }
+    Vector2 MulPoint(const Matrix3x3& m, const Vector2& v)
+    {
+        return Vector2
+        (
+            m.m00 * v.x + m.m01 * v.y + m.m02,
+            m.m10 * v.x + m.m11 * v.y + m.m12
+        );
+    }
+    Vector2 MulVector(const Matrix3x3& m, const Vector2& v)
+    {
+        return Vector2
+        (
+            m.m00 * v.x + m.m01 * v.y,
+            m.m10 * v.x + m.m11 * v.y
+        );
+    }
 
     Matrix3x3 GetTranslateMatrix(const Vector2& pos)
     {
