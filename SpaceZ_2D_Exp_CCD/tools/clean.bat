@@ -8,6 +8,8 @@ REM    1. .build\                (objects / response files / import libs)
 REM    2. Main\Debug\            (exe / pdb / ilk)
 REM    3. Tests\Debug\           (test exe / pdb / ilk)
 REM    4. Assets\Plugins\x86_64\SpaceZ_2D_Exp_CCD.dll (+ .pdb, + .meta)
+REM       Debug and Release share this one output path, so a single
+REM       delete covers whichever flavour was built last.
 REM  Only files produced by this project's build scripts are deleted.
 REM  Sibling C++ projects are NOT touched: each owns its own clean script.
 REM ============================================================

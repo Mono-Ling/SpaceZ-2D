@@ -16,6 +16,20 @@
             "detail": "递归编译 Core 与 UnityPlugin，链接为单个 SpaceZ_2D_Exp_CCD.dll 输出至 Assets/Plugins/x86_64"
         },
         {
+            "label": "构建 Unity 插件 DLL Release (Core+UnityPlugin)",
+            "type": "shell",
+            "command": "${workspaceFolder}\\tools\\build_plugins_release.bat",
+            "args": [],
+            "group": "build",
+            "problemMatcher": "$msCompile",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            },
+            "detail": "Release 优化版插件 DLL（/O2 /GL + link /LTCG，/MD，去掉 /RTC1 与 /OD），输出到与 Debug 相同的 Assets/Plugins/x86_64\\SpaceZ_2D_Exp_CCD.dll，两者互相覆盖，故不并入「构建全部」"
+        },
+        {
             "label": "构建控制台程序 (Core+Main)",
             "type": "shell",
             "command": "${workspaceFolder}\\tools\\build_console.bat",
