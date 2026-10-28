@@ -10,10 +10,11 @@ namespace Core::Object
     struct PoolPtr
     {
     private:
-        T* _ptr;
-        ObjectPool<T>* _pool;
+        T* _ptr = nullptr;
+        ObjectPool<T>* _pool = nullptr;
 
     public:
+        PoolPtr() = default;
         PoolPtr(T* ptr, ObjectPool<T>* pool) : _ptr(ptr), _pool(pool) {}
         PoolPtr(const PoolPtr<T>& other) = delete;
         PoolPtr(PoolPtr<T>&& other) noexcept;
@@ -25,6 +26,7 @@ namespace Core::Object
         explicit operator bool() const;
         T& operator*() const;
         T* operator->() const;
+        T* GetPtr() const;
         void ReleaseOwn();
         void Reset();
 

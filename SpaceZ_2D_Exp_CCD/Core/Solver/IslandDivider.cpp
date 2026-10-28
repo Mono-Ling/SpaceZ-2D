@@ -22,14 +22,14 @@ namespace Core::Solver
             }
             auto it = islandMap.find(root);
             if(it != islandMap.end())
-                it->second.push_back(p);
+                it->second.emplace_back(p);
             else
                 islandMap.insert({root, {p}});
         }
         
         vector<vector<SolverPair>> ans;
         for(auto& island : islandMap)
-            ans.push_back(island.second);
+            ans.emplace_back(move(island.second));
         return ans;
     }
 

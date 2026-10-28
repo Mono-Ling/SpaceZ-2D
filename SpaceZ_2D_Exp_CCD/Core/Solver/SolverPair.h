@@ -20,6 +20,7 @@ namespace Core::Solver
 
         std::vector<SolverCollisionPoint> solverPoints;
 
+        SolverPair() = default;
         explicit SolverPair(const std::vector<Collision::CollisionInfo>& infos);
 
         explicit operator bool() const;

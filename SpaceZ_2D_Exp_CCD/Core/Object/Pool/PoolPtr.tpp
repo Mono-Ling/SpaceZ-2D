@@ -48,6 +48,10 @@ namespace Core::Object
 
     template<typename T>
     requires std::default_initializable<T>
+    T* PoolPtr<T>::GetPtr() const { return _ptr; }
+
+    template<typename T>
+    requires std::default_initializable<T>
     void PoolPtr<T>::ReleaseOwn()
     {
         _ptr = nullptr;
