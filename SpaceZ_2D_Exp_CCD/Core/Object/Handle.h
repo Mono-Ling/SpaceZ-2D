@@ -32,6 +32,12 @@ namespace Core
             return std::hash<uint64_t>{}(h);
         }
         constexpr void CarrySelf() { _generation++; }
+        constexpr Handle<T> Carry() const
+        {
+            Handle<T> handle(*this);
+            handle.CarrySelf();
+            return handle;
+        }
 
         friend constexpr bool operator<(const Handle<T>& a, const Handle<T>& b)
         {
