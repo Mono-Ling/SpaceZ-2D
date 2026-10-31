@@ -1,7 +1,6 @@
 #pragma once
 #include "Math/Vector2.h"
 #include "Math/Matrix3x3.h"
-#include "Math/Math.h"
 #include <utility>
 
 namespace Core::Collision
