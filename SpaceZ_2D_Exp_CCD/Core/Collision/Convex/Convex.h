@@ -30,6 +30,8 @@ namespace Core::Collision
             };
         }
 
+        virtual Math::Vector2 GuardMaxDistancePoint(const Math::Matrix3x3& local2world) const = 0;
+
     protected:
         virtual Math::Vector2 SupportLocal(const Math::Vector2& dir) const = 0;
 

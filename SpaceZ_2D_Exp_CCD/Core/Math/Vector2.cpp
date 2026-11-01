@@ -111,6 +111,16 @@ namespace Core::Math
     {
         return Abs(Cross(point - a, b - a)) / Max((b - a).Length(), Epsilon);
     }
+    float PointToLineSegDistance(const Vector2& point, const Vector2& a, const Vector2& b)
+    {
+        if((b - a).SqrLength() < Epsilon * Epsilon)
+            return Distance(point, a);
+        if(Dot(point - a, b - a) < 0)
+            return Distance(point, a);
+        if(Dot(point - b, a - b) < 0)
+            return Distance(point, b);
+        return Abs(Cross(point - a, b - a)) / Max((b - a).Length(), Epsilon);
+    }
 
     template<>
     Vector2 Lerp<Vector2>(const Vector2& a, const Vector2& b, float n)

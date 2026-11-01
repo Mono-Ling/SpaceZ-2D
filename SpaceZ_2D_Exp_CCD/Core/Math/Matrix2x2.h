@@ -16,6 +16,9 @@ namespace Core::Math
             m10(colA.y), m11(colB.y) {}
 
         explicit Matrix2x2(float angle);
+        explicit Matrix2x2(const Vector2& scale)
+        :   m00(scale.x), m01(0.0f),
+            m10(0.0f), m11(scale.y) {}
         
         Matrix2x2 Transpose() const;
         void TransposeSelf();

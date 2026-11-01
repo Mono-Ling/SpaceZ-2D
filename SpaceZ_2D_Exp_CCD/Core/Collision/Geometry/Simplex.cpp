@@ -22,7 +22,11 @@ namespace Core::Collision
         }
         points[count++] = point;
         if(count == 3)
-            return !IsCollinear(points[0], points[1], points[2]);
+            if(IsCollinear(points[0], points[1], points[2]))
+            {
+                ClearCollinear();
+                return false;
+            }
         return true;
     }
     bool Simplex::ContainsOrigin(Vector2& update)
@@ -58,6 +62,38 @@ namespace Core::Collision
         }
         Debug::LogError("【单纯形】单纯形顶点数量无效");
         return false;
+    }
+    float Simplex::SeparateDis()
+    {
+        if(count == 1)
+            return Distance(Vector2::zero, points[0]);
+
+        auto A = points[0];
+        auto B = points[1];
+        if(count == 2)
+        {
+            auto AO = -A;
+            auto BO = -B;
+            auto AB = B - A;
+            if(Dot(AO, AB) < 0)
+                return Distance(Vector2::zero, A);
+            if(Dot(BO, -AB) < 0)
+                return Distance(Vector2::zero, B);
+            return PointToLineDistance(Vector2::zero, A, B);
+        }
+
+        auto C = points[2];
+        auto ABn = GetVerticalToOrigin(A, B);
+        auto ACn = GetVerticalToOrigin(A, C);
+        auto BCn = GetVerticalToOrigin(B, C);
+        if(Dot(ABn, C - A) < 0 || Dot(ACn, B - A) < 0 || Dot(BCn, A - B) < 0)
+        {
+            auto ABdis = PointToLineSegDistance(Vector2::zero, A, B);
+            auto ACdis = PointToLineSegDistance(Vector2::zero, A, C);
+            auto BCdis = PointToLineSegDistance(Vector2::zero, B, C);
+            return Min(ABdis, Min(ACdis, BCdis));
+        }
+        return -1.0f;
     }
 
     void Simplex::SetPoints(const Vector2& a, const Vector2& b)
@@ -126,7 +162,7 @@ namespace Core::Collision
             return false;
         }
         update = GetVerticalToOrigin(A, B);
-        return IsCollinear(A, B, Vector2::zero);
+        return false;
     }
     bool Simplex::TriangleContainsOrigin(Vector2& update)
     {

@@ -52,6 +52,7 @@ namespace Core::Math
     float Cross(const Vector2& a, const Vector2& b);
     bool IsCollinear(const Vector2& a, const Vector2& b, const Vector2& c);
     float PointToLineDistance(const Vector2& point, const Vector2& a, const Vector2& b);
+    float PointToLineSegDistance(const Vector2& point, const Vector2& a, const Vector2& b);
 
     template<>
     Vector2 Lerp<Vector2>(const Vector2& a, const Vector2& b, float n);

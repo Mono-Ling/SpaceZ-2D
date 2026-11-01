@@ -58,5 +58,10 @@ namespace Core::Collision
                 return {C, C};
             return {D, D};
         }
+
+        inline Math::Vector2 GuardMaxDistancePoint(const Math::Matrix3x3& local2world) const override
+        {
+            return Math::MulPoint(local2world, _extents);
+        }
     };
 }
