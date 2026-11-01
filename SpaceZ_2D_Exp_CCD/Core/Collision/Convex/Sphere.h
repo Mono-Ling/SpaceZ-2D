@@ -1,12 +1,10 @@
 #pragma once
 #include "Collision/Convex/Convex.h"
-#include "Math/Math.h"
 
 namespace Core::Collision
 {
     class Sphere : public Convex
     {
-        static const int SAMPLE_COUNT = 4;
         float _radius = 0.5f;
 
     public:
@@ -24,26 +22,9 @@ namespace Core::Collision
         }
         inline Math::Vector2 GuardMaxDistancePoint(const Math::Matrix3x3& local2world) const override
         {
-            Math::Matrix2x2 S(local2world.GetScale());
-
-            float maxDis = 0.0f;
-            Math::Vector2 maxDisPoint;
-            float step = Math::PI / (2.0f * SAMPLE_COUNT);
-            float angle = 0.0f;
-
-            for(int i = 0; i <= SAMPLE_COUNT; i++)
-            {
-                Math::Vector2 point(Math::Cos(angle) * _radius, Math::Sin(angle) * _radius);
-                angle += step;
-
-                float len = (S * point).SqrLength();
-                if(len > maxDis)
-                {
-                    maxDis = len;
-                    maxDisPoint = point;
-                }
-            }
-            return Math::MulPoint(local2world, maxDisPoint);
+            auto scale = local2world.GetScale();
+            auto& dir = scale.x > scale.y ? Math::Vector2::right : Math::Vector2::up;
+            return Math::MulPoint(local2world, dir * _radius);
         }
     };
 }
