@@ -10,7 +10,6 @@ namespace Core::Collision
     {
         if(!first || !second)
             return false;
-        simplex.count = 0;
         Vector2 update = second.Position() - first.Position();
         update += (update == Vector2::zero) * Vector2::up;
         for(int i = 0; i < MAX_ITERATION; i++)
@@ -99,5 +98,55 @@ namespace Core::Collision
         
         ans.emplace_back(CollisionInfo(info.depth, normal, line.second));
         return ans;
+    }
+
+    bool ContinuousCollision(ContinuousDetectReq& req, float& time, vector<CollisionInfo>& infos)
+    {
+        if(!req)
+            return false;
+        float endTime = time;
+        time = 0.0f;
+        infos.clear();
+        Simplex simplex;
+        bool overlapped = GJK(req.first, req.second, simplex);
+        while (!overlapped && time < endTime)
+        {
+            float far = simplex.SeparateDis();
+            if(simplex.count == 0)
+            {
+                auto dir  = (req.second.Position() - req.first.Position()).Normalized();
+                dir += (dir == Vector2::zero) * Vector2::up;
+                far = Abs(Dot(MinkowskiDiff(dir, req.first, req.second), dir));
+            }
+
+            if(far <= 0.0f)
+            {
+                auto dir = (req.second.Position() - req.first.Position()).Normalized();
+                auto relatV = req.velocity.first - req.velocity.second;
+                if(Dot(relatV, dir) < 0.0f)
+                    return false;
+                far = Epsilon;
+            }
+
+            float vA = req.velocity.first.Length() + Abs(req.angularVelocity.first)
+                    * (req.first.GuardMaxDistancePoint() - req.first.Position()).Length();
+            float vB = req.velocity.second.Length() + Abs(req.angularVelocity.second)
+                    * (req.second.GuardMaxDistancePoint() - req.second.Position()).Length();
+            float v = vA + vB;
+            if(v <= 0.0f)
+                return false;
+            
+            float dt = far / v;
+            dt = Clamp(dt, Epsilon, endTime - time);
+            req.Step(dt);
+            time += dt;
+            simplex.count = 0;
+            overlapped = GJK(req.first, req.second, simplex);
+        }
+        if(time > endTime || !overlapped)
+            return false;
+        auto info = EPA(req.first, req.second, simplex.points);
+        infos = ContactManifold(req.first, req.second, info);
+        return true;
     }
 }

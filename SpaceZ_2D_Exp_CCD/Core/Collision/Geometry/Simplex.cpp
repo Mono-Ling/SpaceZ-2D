@@ -138,7 +138,7 @@ namespace Core::Collision
         if(!IsPointCountCorrect(count, 1))
             return false;
         update = -points[0];
-        return points[0] == Vector2::zero;
+        return false;
     }
     bool Simplex::LineContainsOrigin(Vector2& update)
     {
