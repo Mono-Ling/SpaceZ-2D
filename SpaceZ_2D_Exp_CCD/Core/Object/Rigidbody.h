@@ -1,28 +1,50 @@
 #pragma once
 #include "Object/Object.h"
 #include "Math/Vector2.h"
+#include "Math/Transform.h"
 
 namespace Core
 {
+    enum class ForceType : int
+    {
+        Impulse,
+        Sustain,
+    };
+
     class Rigidbody
     {
     private:
         RigidbodyHandle _handle;
 
     public:
+        bool useGravity = true;
         float mass = 1.0f;
         float inertia = 1.0f;
 
-        float angle;
-        float angularVelocity;
+        float linearDrag = 0.0f;
+        float angularDrag = 0.05f;
 
-        Math::Vector2 position;
+        float angularVelocity;
         Math::Vector2 linearVelocity;
+
+        Math::Vector2 force;
+        float torque = 0.0f;
+
+        Math::Transform transform;
 
         Rigidbody(const RigidbodyHandle& handle) : _handle(handle) {}
 
         inline RigidbodyHandle Handle() const { return _handle; }
-        inline Math::Vector2 Position() const { return position; }
-        inline float Rotation() const { return angle; }
+        inline Math::Vector2 Position() const { return transform.Position(); }
+        inline float Rotation() const { return transform.Rotation(); }
+
+        void AddForce(const Math::Vector2& force, ForceType type);
+        void AddTorque(float torque, ForceType type);
+        void Step(float dt);
+        void StepTransform(float dt);
+
+    private:
+        void ApplyImpulse(const Math::Vector2& impulse);
+        void ApplyImpulseMoment(float moment);
     };
 }

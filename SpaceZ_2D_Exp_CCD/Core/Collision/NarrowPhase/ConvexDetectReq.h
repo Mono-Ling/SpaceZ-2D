@@ -8,12 +8,12 @@ namespace Core::Collision
     struct ConvexDetectReq
     {
     private:
-        Convex* _convex = nullptr;
+        const Convex* _convex = nullptr;
         Math::Matrix3x3 _localToWorld;
         Math::Matrix3x3 _worldToLocal;
 
     public:
-        ConvexDetectReq(Convex* convex, const Math::Matrix3x3& local2world, const Math::Matrix3x3& world2local)
+        ConvexDetectReq(const Convex* convex, const Math::Matrix3x3& local2world, const Math::Matrix3x3& world2local)
         : _convex(convex), _localToWorld(local2world), _worldToLocal(world2local) {}
 
         explicit operator bool() const;
