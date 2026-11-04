@@ -92,8 +92,6 @@ namespace Core
             auto time = dt;
             auto reqs = CollisionStep(time);
             dt -= time;
-            if(dt <= 0)
-                break;
             BodyStep(time);
             TransformStep(time);
             SolveStep(reqs);
@@ -153,9 +151,9 @@ namespace Core
         {
             return a.first < b.first;
         });
-        time = reqs.front().first;
+        time = Min(reqs.front().first, time * MIN_CCD_STEP);
         for(auto& req : reqs)
-            if(Near(req.first, time))
+            if(req.first < time || Near(req.first, time))
                 ans.push_back(req.second);
         return ans;
     }

@@ -17,6 +17,8 @@ namespace Core
 {
     class PhySystem
     {
+        static constexpr int MIN_CCD_STEP = 0.01f;
+
         int _subStepCount;
 
         /// @brief 物理层-刚体位置更改
