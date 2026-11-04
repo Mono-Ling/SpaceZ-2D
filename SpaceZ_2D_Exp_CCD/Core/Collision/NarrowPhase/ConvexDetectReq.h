@@ -13,6 +13,7 @@ namespace Core::Collision
         Math::Matrix3x3 _worldToLocal;
 
     public:
+        ConvexDetectReq() = default;
         ConvexDetectReq(const Convex* convex, const Math::Matrix3x3& local2world, const Math::Matrix3x3& world2local)
         : _convex(convex), _localToWorld(local2world), _worldToLocal(world2local) {}
 

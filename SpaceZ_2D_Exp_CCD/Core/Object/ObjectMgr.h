@@ -25,7 +25,7 @@ namespace Core::Object
         /// @param handle 句柄
         /// @param ptr 指针引用
         /// @return 是否获取成功
-        bool TryGet(const Handle<T>& handle, T*& ptr);
+        bool TryGet(const Handle<T>& handle, T*& ptr) const;
         void ForEach(const std::function<void(const Handle<T>&, T&)>& func);
 
     private:

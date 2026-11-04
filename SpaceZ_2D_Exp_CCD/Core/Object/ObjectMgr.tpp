@@ -74,7 +74,7 @@ namespace Core::Object
     }
 
     template<typename T>
-    bool ObjectMgr<T>::TryGet(const Handle<T>& handle, T*& ptr)
+    bool ObjectMgr<T>::TryGet(const Handle<T>& handle, T*& ptr) const
     {
         ptr = nullptr;
         if(!Contains(handle))

@@ -22,6 +22,7 @@ namespace Core
         Math::Transform transform;
 
         Collider(const ColliderHandle& handle) : _handle(handle) {}
+        virtual ~Collider() = default;
 
         inline ColliderHandle Handle() const { return _handle; }
         inline RigidbodyHandle Body() const { return _body; }

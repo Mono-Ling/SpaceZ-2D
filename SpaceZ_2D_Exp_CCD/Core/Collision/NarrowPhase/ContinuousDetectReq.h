@@ -12,6 +12,7 @@ namespace Core::Collision
         std::pair<Math::Vector2, Math::Vector2> velocity;
         std::pair<float, float> angularVelocity;
 
+        ContinuousDetectReq() = default;
         ContinuousDetectReq(const ConvexDetectReq& first, const ConvexDetectReq& second, const std::pair<Math::Vector2, Math::Vector2>& velocity, const std::pair<float, float>& angularVelocity)
             : first(first), second(second), velocity(velocity), angularVelocity(angularVelocity) {}
 

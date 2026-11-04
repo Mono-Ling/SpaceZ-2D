@@ -13,6 +13,7 @@ namespace Core::Solver
 
         std::vector<Collision::CollisionInfo> collisionInfos;
 
+        SolveReq() : colliders({nullptr, nullptr}), bodies({nullptr, nullptr}) {}
         inline operator bool() const { return colliders.first && colliders.second; }
     };
 }
