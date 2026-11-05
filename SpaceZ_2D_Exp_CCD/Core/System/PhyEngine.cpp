@@ -36,7 +36,7 @@ namespace Core
         if(!body)
             return;
         auto& transform = body->transform;
-        auto colliders = _dynamicColliders[handle];
+        auto& colliders = _dynamicColliders[handle];
         for(auto& collider : colliders)
         {
             auto ptr = TryGetCollider<Collider>(collider);
@@ -86,11 +86,13 @@ namespace Core
     }
     void PhySystem::SubStep(float dt)
     {
-        while (dt >= 0)
+        while (dt > 0.0f)
         {
             SynBroadPhase(dt);
             auto time = dt;
             auto reqs = CollisionStep(time);
+            if(time <= dt * MIN_CCD_STEP)
+                time = dt;
             dt -= time;
             BodyStep(time);
             TransformStep(time);
@@ -151,10 +153,10 @@ namespace Core
         {
             return a.first < b.first;
         });
-        time = Min(reqs.front().first, time * MIN_CCD_STEP);
+        time = Clamp(reqs.front().first, time * MIN_CCD_STEP, time);
         for(auto& req : reqs)
             if(req.first < time || Near(req.first, time))
-                ans.push_back(req.second);
+                ans.emplace_back(move(req.second));
         return ans;
     }
     void PhySystem::BodyStep(float dt)
@@ -170,7 +172,8 @@ namespace Core
     {
         _bodies.ForEach([&](const RigidbodyHandle& handle, Rigidbody& body)
         {
-            body.StepTransform(dt);
+            if(!body.StepTransform(dt))
+                return;
 
             SynDynamicCollider(handle);
             _dirtyBodySet.insert(handle);

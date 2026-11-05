@@ -49,10 +49,10 @@ namespace Core::Collision
             if(p.first->IsLeaf() || p.second->IsLeaf())
             {
                 if(p.first->IsLeaf() && p.second->IsLeaf())
+                {
                     if(IsIntersect(p.first->obj, p.second->obj))
-                    {
                         ans.push_back(CreateCollisionPair(p.first->obj, p.second->obj));
-                    }
+                }
                 else if(p.first->IsLeaf())
                 {
                     st.emplace(pair<BVHNode*, BVHNode*>(p.first, p.second->left));

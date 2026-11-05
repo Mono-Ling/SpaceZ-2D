@@ -45,15 +45,18 @@ namespace Core
         force = Vector2::zero;
         torque = 0.0f;
     }
-    void Rigidbody::StepTransform(float dt)
+    bool Rigidbody::StepTransform(float dt)
     {
         if(dt <= 0)
-            return;
+            return false;
+        if(linearVelocity == Vector2::zero && Near(angularVelocity, 0.0f))
+            return false;
         linearVelocity *= Exp(-linearDrag * dt);
         angularVelocity *= Exp(-angularDrag * dt);
         
         transform.Position(transform.Position() + linearVelocity * dt);
         transform.Rotation(transform.Rotation() + angularVelocity * dt);
+        return true;
     }
 
     void Rigidbody::ApplyImpulse(const Vector2& impulse)

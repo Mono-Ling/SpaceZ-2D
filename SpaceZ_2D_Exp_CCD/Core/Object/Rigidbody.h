@@ -24,7 +24,7 @@ namespace Core
         float linearDrag = 0.0f;
         float angularDrag = 0.05f;
 
-        float angularVelocity;
+        float angularVelocity = 0.0f;
         Math::Vector2 linearVelocity;
 
         Math::Vector2 force;
@@ -41,7 +41,10 @@ namespace Core
         void AddForce(const Math::Vector2& force, ForceType type);
         void AddTorque(float torque, ForceType type);
         void Step(float dt);
-        void StepTransform(float dt);
+        /// @brief transform步进
+        /// @param dt delta time
+        /// @return 是否产生变化
+        bool StepTransform(float dt);
 
     private:
         void ApplyImpulse(const Math::Vector2& impulse);

@@ -8,6 +8,7 @@
 #include "Collision/BVH/BVHTree.h"
 #include "Collision/NarrowPhase/NarrowPhase.h"
 #include "Solver/PhySolver.h"
+#include <concepts>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -17,7 +18,7 @@ namespace Core
 {
     class PhySystem
     {
-        static constexpr int MIN_CCD_STEP = 0.01f;
+        static constexpr float MIN_CCD_STEP = 0.01f;
 
         int _subStepCount;
 
@@ -35,12 +36,12 @@ namespace Core
         Solver::PhySolver _solver;
 
     public:
-        PhySystem(int subStep, int iteration) : _subStepCount(subStep), _solver({iteration}) {}
+        PhySystem(int subStep, int iteration) : _subStepCount(subStep > 1 ? subStep : 1), _solver({iteration}) {}
 
         RigidbodyHandle CreateBody();
         ColliderHandle CreateCollider(const RigidbodyHandle& body, ColliderType type);
-        void DestoryBody(const RigidbodyHandle& handle);
-        void DestoryCollider(const ColliderHandle& handle);
+        void DestroyBody(const RigidbodyHandle& handle);
+        void DestroyCollider(const ColliderHandle& handle);
 
         void SetBody(const RigidbodyHandle& handle, float mass, float inertia, bool useGravity);
         void SetBodyDrag(const RigidbodyHandle& handle, float lDrag, float aDrag);
@@ -63,8 +64,8 @@ namespace Core
         /// @param func (handle, position, rotation, linearV, angularV)
         void ForeachDirtyBodies(const std::function<void(const RigidbodyHandle&, const Math::Vector2&, float, const Math::Vector2&, float)>& func) const;
 
-        void AddForce(const RigidbodyHandle& handle, const Math::Vector2& force);
-        void AddTorque(const RigidbodyHandle& handle, float torque);
+        void AddForce(const RigidbodyHandle& handle, const Math::Vector2& force, ForceType type);
+        void AddTorque(const RigidbodyHandle& handle, float torque, ForceType type);
 
     private:
         template<typename T>
