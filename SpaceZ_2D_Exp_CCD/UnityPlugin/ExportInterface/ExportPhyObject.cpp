@@ -18,7 +18,7 @@ EXPORT_FUNCTION ExportHandle CreateBody()
         return ExportHandle::From(RigidbodyHandle::null);
     TRY_CATCH_DEBUG
     (
-        { ExportHandle::From(phySystem->CreateBody()); },
+        { return ExportHandle::From(phySystem->CreateBody()); },
         "物理对象",
         "刚体创建异常"
     );
@@ -30,7 +30,7 @@ EXPORT_FUNCTION ExportHandle CreateCollider(RigidbodyHandle body, ColliderType t
         return ExportHandle::From(ColliderHandle::null);
     TRY_CATCH_DEBUG
     (
-        { ExportHandle::From(phySystem->CreateCollider(body, type)); },
+        { return ExportHandle::From(phySystem->CreateCollider(body, type)); },
         "物理对象",
         "碰撞体创建异常"
     );
