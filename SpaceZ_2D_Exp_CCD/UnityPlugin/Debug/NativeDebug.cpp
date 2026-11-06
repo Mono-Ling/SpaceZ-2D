@@ -1,6 +1,7 @@
-#include"IUnityLog.h"
-#include"Debug/NativeDebug.h"
-#include"UnityInterface/UnityPlugin.h"
+#include "IUnityLog.h"
+#include "Debug/NativeDebug.h"
+#include "UnityInterface/UnityPlugin.h"
+#include "Debug/Debug.h"
 
 static IUnityLog* unityLogPtr = nullptr;
 
@@ -14,9 +15,18 @@ static void OnNativeDebugUnload()
     unityLogPtr = nullptr;
 }
 
-static bool registered = [](){
+static bool registered = []()
+{
     UnityPluginLoadCallbacks().push_back(OnNativeDebugLoad);
     UnityPluginUnloadCallbacks().push_back(OnNativeDebugUnload);
+    return true;
+}();
+
+static bool coreDebug = []()
+{
+    Core::Debug::debugLog.emplace_back(::Debug::Log);
+    Core::Debug::debugLogWarning.emplace_back(::Debug::LogWarning);
+    Core::Debug::debugLogError.emplace_back(::Debug::LogError);
     return true;
 }();
 

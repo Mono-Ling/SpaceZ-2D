@@ -17,7 +17,7 @@ namespace Core::Debug
     inline void LogError(const std::string& message);
 
     template<typename T>
-    concept ToStringAbility = requires(T message)
+    concept ToStringAbility = requires(const T& message)
     {
         { ToString<T>(message) } -> std::same_as<std::string>;
     };

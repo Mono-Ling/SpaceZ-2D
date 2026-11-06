@@ -5,7 +5,7 @@
 namespace Core
 {
     template<typename T>
-    std::string ToString(const T& obj);
+    std::string ToString(const T& obj) = delete;
 
     template<typename T>
     requires requires(T a) { std::to_string(a); }
