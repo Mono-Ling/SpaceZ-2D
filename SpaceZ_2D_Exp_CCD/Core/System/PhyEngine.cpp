@@ -88,15 +88,20 @@ namespace Core
     {
         while (dt > 0.0f)
         {
+            float step = dt; 
             SynBroadPhase(dt);
             auto time = dt;
             auto reqs = CollisionStep(time);
-            if(time <= dt * MIN_CCD_STEP)
-                time = dt;
-            dt -= time;
+            dt = step - time;
             BodyStep(time);
             TransformStep(time);
             SolveStep(reqs);
+            if(time <= step * MIN_CCD_STEP)
+            {
+                BodyStep(dt);
+                TransformStep(dt);
+                break;
+            }
         }
     }
     void PhySystem::SynBroadPhase(float dt)
