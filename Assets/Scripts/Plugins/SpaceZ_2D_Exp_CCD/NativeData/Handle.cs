@@ -17,6 +17,8 @@ namespace SpaceZ_2D.Exp.CCD
         }
         override public int GetHashCode()
         => (id, generation).GetHashCode();
+        public override string ToString()
+        => $"({id}, {generation})";
 
         public static Handle NULL => _NULL;
         private static Handle   _NULL = new(){ id = -1, generation = 0};
