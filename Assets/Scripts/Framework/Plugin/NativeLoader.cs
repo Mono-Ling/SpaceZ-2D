@@ -77,8 +77,6 @@ namespace SpaceZ_2D.Framework.Plugin
 #endregion
 
 #if UNITY_EDITOR
-        private delegate void GetUnityInterface();
-
         [DllImport("EditorPlugin", EntryPoint = "GetUnityInterface")]
         private static extern IntPtr GetUnityInterfaceEditorPlugin();
 
@@ -119,6 +117,16 @@ namespace SpaceZ_2D.Framework.Plugin
                 return false;
             function = Marshal.GetDelegateForFunctionPointer<T>(procAddress);
             return true;
+        }
+        public Delegate GetFunction(string functionName, Type type)
+        {
+            if (_library == null)
+                return null;
+            IntPtr procAddress = GetProcAddress(_library.Handle, functionName);
+            if (procAddress == IntPtr.Zero)
+                return null;
+            var func = Marshal.GetDelegateForFunctionPointer(procAddress, type);
+            return func;
         }
         public void Dispose()
         {
