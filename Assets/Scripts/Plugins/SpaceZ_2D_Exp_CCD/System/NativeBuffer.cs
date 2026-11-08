@@ -45,12 +45,16 @@ namespace SpaceZ_2D.Exp.CCD
     {
         public unsafe void GetNativeData(ref int count, NativeWriteFunc<T> func)
         {
-            if(!_buffer.IsCreated || _buffer.IsEmpty)
+            if(!_buffer.IsCreated)
                 return;
             count = Mathf.Max(0, count);
-            _buffer.Length = count;
             if(count == 0)
+            {
+                _buffer.Clear();
                 return;
+            }
+
+            _buffer.Length = count;
             T* ptr = _buffer.GetUnsafePtr();
             func?.Invoke(ptr, ref count);
             _buffer.Length = Mathf.Max(0, count);

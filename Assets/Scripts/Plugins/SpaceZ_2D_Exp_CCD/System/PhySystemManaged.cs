@@ -28,7 +28,8 @@ namespace SpaceZ_2D.Exp.CCD
         private static NativeReadBuffer<BodyForce> _bodyForces = new();
         private static NativeReadBuffer<BodyTorque> _bodyTorques = new();
 
-        private static List<INativeComponent> _nativeComponents = new();
+        private static HashSet<INativeComponent> _nativeComponents = new();
+        private static readonly List<INativeComponent> _componentBuffer = new();
 
         [RuntimeStart(-90)]
         private static void InitManaged()
@@ -79,15 +80,9 @@ namespace SpaceZ_2D.Exp.CCD
         }
         private static void ComponentUpdate()
         {
-            _nativeComponents.Clear();
-            foreach(var body in _bodies.Values)
-                if(body is INativeComponent bodyCom)
-                    _nativeComponents.Add(bodyCom);
-            foreach(var collider in _colliders.Values)
-                if(collider is INativeComponent colliderCom)
-                    _nativeComponents.Add(colliderCom);
-
-            foreach(var component in _nativeComponents)
+            _componentBuffer.Clear();
+            _componentBuffer.AddRange(_nativeComponents);
+            foreach(var component in _componentBuffer)
                 component?.ComponentUpdate();
         }
         private static void SynDirtyData()
@@ -116,27 +111,33 @@ namespace SpaceZ_2D.Exp.CCD
             {
                 _dirtyBodies.GetNativeData(ref count, GetDirtyBodies);
             }
+            var list = _dirtyBodies.NativeData;
+            foreach(var info in list)
+                if(TryGetBody(info.handle, out var body))
+                    body?.SetBodyInfo(info.position, info.rotation, info.linearVelocity, info.angularVelocity);
         }
 
-        private static Rigidbody2D_Exp_CCD TryGetBody(Handle handle, bool debug = true)
+        private static bool TryGetBody(Handle handle, out Rigidbody2D_Exp_CCD body, bool debug = true)
         {
-            if(!handle || !_bodies.TryGetValue(handle, out var body))
+            if(!handle || !_bodies.TryGetValue(handle, out body))
             {
                 if(debug)
                     Debug.LogWarning($"【Exp CCD 托管物理引擎】无效刚体句柄{handle}");
-                return null;
+                body = null;
+                return false;
             }
-            return body;
+            return true;
         }
-        private static Collider2D_Exp_CCD TryGetCollider(Handle handle, bool debug = true)
+        private static bool TryGetCollider(Handle handle, out Collider2D_Exp_CCD collider,  bool debug = true)
         {
-            if(!handle || !_colliders.TryGetValue(handle, out var collider))
+            if(!handle || !_colliders.TryGetValue(handle, out collider))
             {
                 if(debug)
                     Debug.LogWarning($"【Exp CCD 托管物理引擎】无效碰撞体句柄{handle}");
-                return null;
+                collider = null;
+                return false;
             }
-            return collider;
+            return true;
         }
     }
 }
