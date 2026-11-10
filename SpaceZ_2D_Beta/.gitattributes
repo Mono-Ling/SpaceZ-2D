@@ -1,0 +1,8 @@
+# 批处理一律 CRLF + LF 归一化：cmd 按字节偏移定位 label，行尾混杂会让 goto 跳错位置
+*.bat  text eol=crlf
+
+# 编译产物按二进制处理，避免任何换行转换
+*.obj  binary
+*.pdb  binary
+*.lib  binary
+*.exp  binary

@@ -1,0 +1,27 @@
+{
+    // IntelliSense 配置：与 Tools 下批处理的 MSVC Debug x64 编译选项保持一致。
+    // ${workspaceFolder} 本身作为 include 根，使 <Core/xxx.h> / <UnityPlugin/xxx.h>
+    // 这种「带模块名的包含」可解析——推荐用它来避免跨模块同名目录
+    //（Core/Debug 与 UnityPlugin/Debug）之间的歧义。
+    "version": 4,
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}",
+                "${workspaceFolder}/Core",
+                "${workspaceFolder}/UnityPlugin",
+                "${workspaceFolder}/Main",
+                "${workspaceFolder}/Tests"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "cStandard": "c17",
+            "cppStandard": "c++20",
+            "intelliSenseMode": "windows-msvc-x64"
+        }
+    ]
+}

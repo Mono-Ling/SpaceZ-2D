@@ -1,0 +1,28 @@
+{
+    // 控制台程序（Core+Main）的运行/调试配置
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "运行控制台程序 (Core+Main)",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/Main/Debug/SpaceZ_2D_Beta.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/Main/Debug",
+            "environment": [],
+            "console": "integratedTerminal",
+            "preLaunchTask": "构建控制台程序 (Core+Main)"
+        },
+        {
+            // 插件 DLL 的 pdb 写在 .build\（Debug）与 .build\release\（Release），
+            // 都不在 Assets 里；不声明 symbolSearchPath 的话 attach 后断点会显示
+            // 「未加载符号」，看起来像构建没带调试信息。
+            "name": "附加到 Unity (调试原生 DLL)",
+            "type": "cppvsdbg",
+            "request": "attach",
+            "processId": "${command:pickProcess}",
+            "symbolSearchPath": "${workspaceFolder}/.build;${workspaceFolder}/.build/release;${workspaceFolder}/Main/Debug"
+        }
+    ]
+}

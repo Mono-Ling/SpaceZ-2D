@@ -1,0 +1,20 @@
+{
+    // 只隐藏编译中间产物与调试文件；不要用 **/*.exe、**/*.obj 这类通配，
+    // 那会把插件 DLL 和以后可能要看的二进制资源一起藏起来。
+    "files.exclude": {
+        "**/.build": true,
+        "Main/Debug": true,
+        "Tests/Debug": true
+    },
+    "search.exclude": {
+        "**/.build": true,
+        "Main/Debug": true,
+        "Tests/Debug": true
+    },
+    "files.encoding": "utf8",
+    "files.associations": {
+        "*.tpp": "cpp",
+        "*.h": "cpp"
+    },
+    "editor.formatOnSave": false
+}
