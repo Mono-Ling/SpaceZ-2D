@@ -7,10 +7,6 @@ namespace Core::Debug
 {
     template<ToStringAbility... Args>
     requires (sizeof...(Args) >= 1)
-    std::string StringFormat(Args... args);
-
-    template<ToStringAbility... Args>
-    requires (sizeof...(Args) >= 1)
     void LogFormat(Args... args);
 
     template<ToStringAbility... Args>

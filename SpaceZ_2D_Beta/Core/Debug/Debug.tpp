@@ -27,18 +27,18 @@ namespace Core::Debug
     template<ToStringAbility T>
     void Log(const T& message)
     {
-        Log<std::string>(message);
+        Log<std::string>(ToString(message));
     }
 
     template<ToStringAbility T>
     void LogWarning(const T& message)
     {
-        LogWarning<std::string>(message);
+        LogWarning<std::string>(ToString(message));
     }
 
     template<ToStringAbility T>
     void LogError(const T& message)
     {
-        LogError<std::string>(message);
+        LogError<std::string>(ToString(message));
     }
 }

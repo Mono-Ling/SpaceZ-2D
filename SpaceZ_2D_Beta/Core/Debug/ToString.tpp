@@ -4,22 +4,26 @@
 namespace Core
 {
     template<typename T>
-    requires requires(const T& msg)
-    {
-        {std::to_string(msg)} -> std::same_as<std::string>;
-    }
+    requires StdToStringAbility<T>
     std::string ToString(const T& message)
     {
         return std::to_string(message);
     }
 
     template<typename T>
-    requires requires(const T& msg)
-    {
-        {std::string{msg}} -> std::same_as<std::string>;
-    }
+    requires CreateStringAbility<T> && (!StdToStringAbility<T>)
     std::string ToString(const T& message)
     {
         return {message};
+    }
+
+
+    template<ToStringAbility... Args>
+    requires (sizeof...(Args) >= 1)
+    std::string StringFormat(Args... args)
+    {
+        std::string str;
+        (str.append(ToString(args)), ...);
+        return str;
     }
 }

@@ -1,5 +1,5 @@
 #pragma once
-#include "Debug/ToString.h"
+#include "Core/Debug/ToString.h"
 #include <functional>
 
 namespace Core::Debug
