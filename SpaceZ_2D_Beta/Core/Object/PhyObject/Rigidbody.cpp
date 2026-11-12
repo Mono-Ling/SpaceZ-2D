@@ -7,29 +7,29 @@ using namespace std;
 
 namespace Core
 {
-    void Rigidbody::AddForce(const Vector2& force, ForceMode mode)
+    void Rigidbody::AddForce(const Vector2& f, ForceMode mode)
     {
         switch(mode)
         {
         case ForceMode::Impulse:
-            ApplyImpulse(force);
+            ApplyImpulse(f);
         break;
 
         case ForceMode::Sustain:
-            this->force += force;
+            this->force += f;
         break;
         }
     }
-    void Rigidbody::AddTorque(float torque, ForceMode mode)
+    void Rigidbody::AddTorque(float t, ForceMode mode)
     {
         switch(mode)
         {
         case ForceMode::Impulse:
-            ApplyImpulseMoment(torque);
+            ApplyImpulseMoment(t);
         break;
 
         case ForceMode::Sustain:
-            this->torque += torque;
+            this->torque += t;
         break;
         }
     }
