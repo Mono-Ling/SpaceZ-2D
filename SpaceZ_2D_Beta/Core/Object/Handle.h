@@ -15,6 +15,10 @@ namespace Core
         constexpr Handle() : _id(-1), _generation(0) {}
         constexpr explicit Handle(int id) : _id(id > -1 ? id : -1), _generation(0) {}
 
+        template<typename U>
+        constexpr explicit Handle(const Handle<U>& other)
+        : _id(other.Id()), _generation(other.Generation()) {}
+
         explicit operator bool() const { return *this != null; }
         constexpr int Id() const { return _id; }
         constexpr unsigned int Generation() const { return _generation; }

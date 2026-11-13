@@ -8,6 +8,9 @@ namespace Core::Container
     int ObjectBuffer<T, Ptr>::Size() const { return static_cast<int>(_buffer.size()); }
 
     template<typename T, std::default_initializable Ptr>
+    void ObjectBuffer<T, Ptr>::Clear() { _buffer.clear(); }
+
+    template<typename T, std::default_initializable Ptr>
     bool ObjectBuffer<T, Ptr>::Contains(const Handle<T>& handle) const
     {
         if(!handle)

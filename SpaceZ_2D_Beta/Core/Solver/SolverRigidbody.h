@@ -1,4 +1,5 @@
 #pragma once
+#include "Core/Object/Handle.h"
 #include "Core/Math/Vector2.h"
 
 namespace Core::Solver
@@ -29,4 +30,6 @@ namespace Core::Solver
         Math::Vector2 PointLocalToWorld(const Math::Vector2& point) const;
         Math::Vector2 PointWorldToLocal(const Math::Vector2& point) const;
     };
+
+    using SolverBodyHandle = Handle<SolverRigidbody>;
 }

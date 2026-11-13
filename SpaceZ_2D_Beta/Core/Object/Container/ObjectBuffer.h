@@ -25,6 +25,7 @@ namespace Core::Container
         ObjectBuffer& operator=(ObjectBuffer<T>&& other) = delete;
 
         int Size() const;
+        void Clear();
         bool Contains(const Handle<T>& handle) const;
         virtual bool TryAdd(const Handle<T>& handle , Ptr&& ptr);
         virtual bool TryRemove(const Handle<T>& handle);

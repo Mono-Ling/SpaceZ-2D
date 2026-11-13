@@ -21,13 +21,13 @@ namespace Core::Debug
 
 
     template<>
-    void Log<std::string>(const std::string& message);
+    inline void Log<std::string>(const std::string& message);
 
     template<>
-    void LogWarning<std::string>(const std::string& message);
+    inline void LogWarning<std::string>(const std::string& message);
 
     template<>
-    void LogError<std::string>(const std::string& message);
+    inline void LogError<std::string>(const std::string& message);
 
 
     template<ToStringAbility T>
