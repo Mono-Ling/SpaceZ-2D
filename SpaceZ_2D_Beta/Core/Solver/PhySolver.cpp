@@ -133,15 +133,16 @@ namespace Core::Solver
 
         for(auto& p : pairs)
             p.Precompute();
+            
         for(int i = 0; i < _iteration; i++)
-        {
             for(auto& p : pairs)
-            {
-                p.ApplyNormalImpulse();
-                p.ApplyTangentImpulse();
-            }
+                {
+                    p.ApplyNormalImpulse();
+                    p.ApplyTangentImpulse();
+                }
+
+        for(int i = 0; i < _iteration; i++)
             for(auto& p : pairs)
                 p.ApplyPositionCorrection();
-        }
     }
 }
