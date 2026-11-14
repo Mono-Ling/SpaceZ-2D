@@ -58,6 +58,10 @@ namespace Core::Math
     float PointToLineSegDistance(const Vector2& point, const Vector2& a, const Vector2& b);
 
     template<>
+    Vector2 Min<Vector2>(const Vector2& a, const Vector2& b);
+    template<>
+    Vector2 Max<Vector2>(const Vector2& a, const Vector2& b);
+    template<>
     Vector2 Lerp<Vector2>(const Vector2& a, const Vector2& b, float n);
 }
 namespace Core

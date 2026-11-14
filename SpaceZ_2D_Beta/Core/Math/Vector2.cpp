@@ -140,6 +140,24 @@ namespace Core::Math
     }
 
     template<>
+    Vector2 Min<Vector2>(const Vector2& a, const Vector2& b)
+    {
+        return Vector2
+        {
+            Min(a.x, b.x),
+            Min(a.y, b.y),
+        };
+    }
+    template<>
+    Vector2 Max<Vector2>(const Vector2& a, const Vector2& b)
+    {
+        return Vector2
+        {
+            Max(a.x, b.x),
+            Max(a.y, b.y),
+        };
+    }
+    template<>
     Vector2 Lerp<Vector2>(const Vector2& a, const Vector2& b, float n)
     {
         return Vector2

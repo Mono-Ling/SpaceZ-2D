@@ -20,6 +20,11 @@ namespace Core::Math
         { a > b } -> std::convertible_to<bool>;
     };
 
+    template<typename T>
+    T Min(const T& a, const T& b) = delete;
+    template<typename T>
+    T Max(const T& a, const T& b) = delete;
+
     template<LessComparable T>
     constexpr T Min(const T& a, const T& b);
     template<GreaterComparable T>
