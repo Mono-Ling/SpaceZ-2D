@@ -24,7 +24,10 @@ namespace Core::Collision
     void BVHNode::UpdateSelf()
     {
         if(IsLeaf())
+        {
+            layer = obj.layer;
             return;
+        }
         bound = left->bound + right->bound;
         layer = left->layer | right->layer;
         height = Max(left->height, right->height) + 1;
@@ -56,10 +59,10 @@ namespace Core::Collision
 
             if(!first->IsLeaf() && !second->IsLeaf())
             {
-                st.emplace(pair<BVHNode*, BVHNode*>(first->left, second->left));
-                st.emplace(pair<BVHNode*, BVHNode*>(first->right, second->right));
-                st.emplace(pair<BVHNode*, BVHNode*>(first->left, second->right));
-                st.emplace(pair<BVHNode*, BVHNode*>(first->right, second->left));
+                st.emplace(first->left, second->left);
+                st.emplace(first->right, second->right);
+                st.emplace(first->left, second->right);
+                st.emplace(first->right, second->left);
             }
             else
             {
@@ -70,13 +73,13 @@ namespace Core::Collision
                 }
                 else if(first->IsLeaf())
                 {
-                    st.emplace(pair<BVHNode*, BVHNode*>(first, second->left));
-                    st.emplace(pair<BVHNode*, BVHNode*>(first, second->right));
+                    st.emplace(first, second->left);
+                    st.emplace(first, second->right);
                 }
                 else
                 {
-                    st.emplace(pair<BVHNode*, BVHNode*>(first->left, second));
-                    st.emplace(pair<BVHNode*, BVHNode*>(first->right, second));
+                    st.emplace(first->left, second);
+                    st.emplace(first->right, second);
                 }
             }
         }
