@@ -71,6 +71,44 @@ namespace Core::Collision
         }
         return -1.0f;
     }
+    bool Simplex::TryComplete(Vector2& update)
+    {
+        switch(count)
+        {
+        case 1:
+            update = -points[0];
+        break;
+
+        case 2:
+            update = GetVerticalToOrigin(points[0], points[1]);
+        break;
+
+        case 3:
+            auto& A = points[0];
+            auto& B = points[1];
+            auto& C = points[2];
+            if(IsCollinear(A, B, Vector2::zero))
+            {
+                update = GetVerticalToOrigin(A, C);
+                SetPoints(A, C);
+                break;
+            }
+            if(IsCollinear(A, C, Vector2::zero))
+            {
+                update = GetVerticalToOrigin(A, B);
+                SetPoints(A, B);
+                break;
+            }
+            if(IsCollinear(B, C, Vector2::zero))
+            {
+                update = GetVerticalToOrigin(A, B);
+                SetPoints(A, B);
+                break;
+            }
+            return true;
+        }
+        return false;
+    }
 
     void Simplex::SetPoints(const Vector2& a, const Vector2& b)
     {

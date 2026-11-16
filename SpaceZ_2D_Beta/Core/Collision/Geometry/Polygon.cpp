@@ -88,7 +88,7 @@ namespace Core::Collision
         auto boundPoints = VisibleBound();
         for(auto& i : boundPoints)
             if(_points[i] != point)
-                _lines.emplace_back(i, _points.size() - 1, _points);
+                _lines.emplace_back(i, static_cast<int>(_points.size() - 1), _points);
         RemoveVisibleLine();
     }
 

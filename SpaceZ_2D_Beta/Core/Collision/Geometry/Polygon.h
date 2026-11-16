@@ -2,6 +2,7 @@
 #include "Core/Math/Vector2.h"
 #include <vector>
 #include <array>
+#include <unordered_map>
 
 namespace Core::Collision
 {
@@ -24,7 +25,7 @@ namespace Core::Collision
         std::vector<Math::Vector2> _points;
         std::vector<Line> _lines;
 
-        unordered_map<int, int> _visiblePoints;
+        std::unordered_map<int, int> _visiblePoints;
 
     public:
         Polygon(const std::array<Math::Vector2, 3>& arr);

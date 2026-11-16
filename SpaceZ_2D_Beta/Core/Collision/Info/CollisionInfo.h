@@ -5,7 +5,7 @@ namespace Core::Collision
 {
     struct CollisionInfo
     {
-        float depth = 0.0f;
+        float depth = -1.0f;
         Math::Vector2 point;
         Math::Vector2 normal;
     };

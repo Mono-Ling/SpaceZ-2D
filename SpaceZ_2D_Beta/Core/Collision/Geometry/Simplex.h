@@ -12,6 +12,7 @@ namespace Core::Collision
         bool AddPoint(const Math::Vector2& point);
         bool ContainsOrigin(Math::Vector2& update);
 
+        bool TryComplete(Math::Vector2& update);
         float SeparateDis();
         
     private:
