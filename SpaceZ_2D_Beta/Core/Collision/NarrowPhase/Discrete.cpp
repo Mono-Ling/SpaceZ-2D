@@ -7,8 +7,11 @@ using namespace std;
 
 namespace Core::Collision
 {
-    bool GJK(const ConvexDetectReq& first, const ConvexDetectReq& second, Simplex& simplex)
+    bool GJK(const ConvexDetectReq& first, const ConvexDetectReq& second, Simplex& simplex, Vector2* separateAxis)
     {
+        if(separateAxis)
+            *separateAxis = Vector2::zero;
+
         if(!first || !second)
             return false;
         Vector2 dir = second.Position() - first.Position();
@@ -18,7 +21,11 @@ namespace Core::Collision
         {
             auto point = MinkowskiDiff(dir, first, second);
             if(LessNear(Dot(point, dir), 0.0f))
+            {
+                if(separateAxis)
+                *separateAxis = -dir;
                 return false;
+            }
             if(!simplex.AddPoint(point))
             {
                 dir = dir.Perp();
@@ -27,6 +34,8 @@ namespace Core::Collision
             if(simplex.ContainsOrigin(dir) && simplex.TryComplete(dir))
                 return true;
         }
+        if(separateAxis)
+            *separateAxis = -dir;
         return false;
     }
     CollisionInfo EPA(const ConvexDetectReq& first, const ConvexDetectReq& second, const array<Vector2, 3>& points)

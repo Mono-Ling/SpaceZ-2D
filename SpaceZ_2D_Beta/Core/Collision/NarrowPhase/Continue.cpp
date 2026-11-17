@@ -25,7 +25,8 @@ namespace Core::Collision
         time = 0.0f;
         Simplex simplex;
         int iteration = 0;
-        bool isCollision = GJK(req.first, req.second, simplex);
+        Vector2 separateAxis;
+        bool isCollision = GJK(req.first, req.second, simplex, &separateAxis);
         while(time < endTime && !isCollision)
         {
             float far = simplex.SeparateDis();
@@ -36,12 +37,17 @@ namespace Core::Collision
                 far = Abs(Dot(MinkowskiDiff(dir, req.first, req.second), dir));
             }
 
-            float vA = req.linearVelocity.first.Length()
-                     + Distance(req.first.GuardMaxDistancePoint(), req.first.Position())
+            separateAxis = separateAxis.Normalized();
+            auto arm = separateAxis.Perp();
+            float vA = Abs(Dot(req.linearVelocity.first, separateAxis))
+                     + Abs(Dot(req.first.Support(arm) - req.first.Position(), arm))
                      * Abs(req.angularVelocity.first);
-            float vB = req.linearVelocity.second.Length()
-                     + Distance(req.second.GuardMaxDistancePoint(), req.second.Position())
+
+            arm = -arm;
+            float vB = Abs(Dot(req.linearVelocity.second, separateAxis))
+                     + Abs(Dot(req.second.Support(arm) - req.second.Position(), arm))
                      * Abs(req.angularVelocity.second);
+
             float v = vA + vB;
             if(LessNear(v, 0.0f))
                 return false;
@@ -52,7 +58,7 @@ namespace Core::Collision
             req.Step(dt);
 
             simplex.count = 0;
-            isCollision = GJK(req.first, req.second, simplex);
+            isCollision = GJK(req.first, req.second, simplex, &separateAxis);
 
             if(++iteration >= MAX_ITERATION)
             {
