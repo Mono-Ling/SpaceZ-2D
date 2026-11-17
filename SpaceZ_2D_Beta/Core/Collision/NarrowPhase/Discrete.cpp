@@ -23,7 +23,7 @@ namespace Core::Collision
             if(LessNear(Dot(point, dir), 0.0f))
             {
                 if(separateAxis)
-                *separateAxis = -dir;
+                *separateAxis = dir;
                 return false;
             }
             if(!simplex.AddPoint(point))
@@ -35,7 +35,7 @@ namespace Core::Collision
                 return true;
         }
         if(separateAxis)
-            *separateAxis = -dir;
+            *separateAxis = dir;
         return false;
     }
     CollisionInfo EPA(const ConvexDetectReq& first, const ConvexDetectReq& second, const array<Vector2, 3>& points)
