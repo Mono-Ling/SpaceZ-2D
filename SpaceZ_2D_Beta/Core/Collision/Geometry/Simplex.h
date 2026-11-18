@@ -14,12 +14,13 @@ namespace Core::Collision
 
         bool TryComplete(Math::Vector2& update);
         float SeparateDis();
+        Math::Vector2 MinDisEdgeNormal() const;
         
     private:
         void SetPoints(const Math::Vector2& a, const Math::Vector2& b);
         void SetPoint(const Math::Vector2& point);
         void ClearCollinear();
-        Math::Vector2 GetVerticalToOrigin(const Math::Vector2& a, const Math::Vector2& b);
+        Math::Vector2 GetVerticalToOrigin(const Math::Vector2& a, const Math::Vector2& b) const;
 
         bool PointContainsOrigin(Math::Vector2& update);
         bool LineContainsOrigin(Math::Vector2& update);

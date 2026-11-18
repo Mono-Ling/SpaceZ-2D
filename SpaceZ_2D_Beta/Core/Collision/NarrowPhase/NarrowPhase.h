@@ -3,6 +3,8 @@
 #include "Core/Collision/Geometry/Simplex.h"
 #include "Core/Collision/Info/CollisionInfo.h"
 #include "Core/Collision/Info/ContinueDetectReq.h"
+#include "Core/Collision/Geometry/Ray.h"
+#include "Core/Collision/Info/RayHit.h"
 #include <array>
 #include <vector>
 
@@ -17,4 +19,7 @@ namespace Core::Collision
     std::vector<CollisionInfo> ContactManifold(const ConvexDetectReq& first, const ConvexDetectReq& second, const CollisionInfo& info);
 
     bool ContinueCollision(ContinueDetectReq& req, float& time, std::vector<CollisionInfo>& infos);
+
+    constexpr int RAY_CAST_MAX_ITERATION = 72;
+    bool RayCast(const Ray& ray, const ConvexDetectReq& convex, RayHit& rayHit);
 }

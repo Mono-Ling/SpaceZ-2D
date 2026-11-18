@@ -109,6 +109,30 @@ namespace Core::Collision
         }
         return false;
     }
+    Vector2 Simplex::MinDisEdgeNormal() const
+    {
+        switch(count)
+        {
+        case 2:
+            return GetVerticalToOrigin(points[0], points[1]);
+            
+        case 3:
+            auto& A = points[0];
+            auto& B = points[1];
+            auto& C = points[2];
+            float ABlen = PointToLineSegDistance(Vector2::zero, A, B);
+            float AClen = PointToLineSegDistance(Vector2::zero, A, C);
+            float BClen = PointToLineSegDistance(Vector2::zero, B, C);
+            float minLen = Min(Min(ABlen, AClen), BClen);
+            if(Near(ABlen, minLen))
+                return GetVerticalToOrigin(A, B);
+            else if(Near(AClen, minLen))
+                return GetVerticalToOrigin(A, C);
+            else
+                return GetVerticalToOrigin(B, C);
+        }
+        return Vector2::zero;
+    }
 
     void Simplex::SetPoints(const Vector2& a, const Vector2& b)
     {
@@ -142,7 +166,7 @@ namespace Core::Collision
         else
             SetPoints(B, C);
     }
-    Vector2 Simplex::GetVerticalToOrigin(const Vector2& a, const Vector2& b)
+    Vector2 Simplex::GetVerticalToOrigin(const Vector2& a, const Vector2& b) const
     {
         if(a == b)
             return Vector2::zero;
@@ -154,7 +178,7 @@ namespace Core::Collision
         if(!CorrectPointsCount(count, 1))
             return false;
         update = -points[0];
-        return false;
+        return points[0] == Vector2::zero;
     }
     bool Simplex::LineContainsOrigin(Vector2& update)
     {
@@ -175,7 +199,7 @@ namespace Core::Collision
             return false;
         }
         update = GetVerticalToOrigin(A, B);
-        return false;
+        return IsCollinear(Vector2::zero, A, B);
     }
     bool Simplex::TriangleContainsOrigin(Vector2& update)
     {
