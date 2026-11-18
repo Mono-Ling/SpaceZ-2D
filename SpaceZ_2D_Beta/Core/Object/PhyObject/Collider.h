@@ -1,6 +1,8 @@
 #pragma once
 #include "Core/Object/PhyObject/PhyObject.h"
 #include "Core/Object/PhyObject/Transform.h"
+#include "Core/Collision/Geometry/Bound.h"
+#include "Core/Collision/Info/ConvexDetectReq.h"
 
 namespace Core
 {
@@ -25,5 +27,15 @@ namespace Core
         inline void Body(const RigidbodyHandle& body) { _body = body; }
         inline Math::Vector2 Position() const { return transform.Position(); }
         inline float Rotation() const { return transform.Rotation(); }
+
+        Collision::Bound SweepBound(const Math::Vector2& dx, float da) const;
+        Collision::ConvexDetectReq CreateConvexDetectReq() const;
+
+    protected:
+        virtual Math::Vector2 Support(const Math::Vector2& dir, const Math::Matrix3x3& local2world, const Math::Matrix3x3& world2local) const = 0;
+        virtual const Collision::Convex* ConvexPtr() const = 0;
+
+    private:
+        Collision::Bound BakeBound(const Math::Matrix3x3& local2world, const Math::Matrix3x3& world2local) const;
     };
 }
