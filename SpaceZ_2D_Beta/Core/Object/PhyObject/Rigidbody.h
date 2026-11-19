@@ -37,6 +37,7 @@ namespace Core
 
         inline RigidbodyHandle Handle() const { return _handle; }
         inline Transform& GetTransform() const { return *_transform; }
+        inline const std::shared_ptr<Transform>& TransformPtr() const { return _transform; }
         inline Math::Vector2 Position() const { return _transform->Position(); }
         inline float Rotation() const { return _transform->Rotation(); }
 

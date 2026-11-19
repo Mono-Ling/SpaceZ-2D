@@ -1,6 +1,8 @@
 #pragma once
 #include "Core/Object/PhyObject/PhyObject.h"
 #include "Core/Object/PhyObject/Transform.h"
+#include "Core/Collision/Layer/LayerMask.h"
+#include "Core/Object/PhyObject/Collider/CollisionMode.h"
 #include "Core/Collision/Geometry/Bound.h"
 #include "Core/Collision/Info/ConvexDetectReq.h"
 
@@ -16,6 +18,9 @@ namespace Core
         float staticFriction = 0;
         float dynamicFriction = 0;
         float elasticity = 0;
+
+        Collision::LayerMask layer = Collision::LayerMask::Default;
+        CollisionMode collisionMode = CollisionMode::Discrete;
 
         Transform transform;
 
