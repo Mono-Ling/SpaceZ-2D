@@ -7,6 +7,8 @@
 #include "Core/Object/PhyObject/Collider/ColliderType.h"
 #include "Core/Object/PhyObject/Collider/CollisionMode.h"
 #include "Core/Collision/Layer/LayerMask.h"
+#include "Core/Collision/Info/ConvexDetectReq.h"
+#include "Core/Collision/Info/ContinueDetectReq.h"
 #include "Core/System/CollisionPair.h"
 #include <unordered_set>
 #include <unordered_map>
@@ -16,6 +18,8 @@ namespace Core
 {
     class PhySystem
     {
+        static constexpr float MIN_CCD_STEP = 0.001f;
+        static constexpr int MAX_CCD_ITERATION = 36;
         int _subStep = 1;
 
         Container::ObjectMgr<Rigidbody> _bodies;
@@ -46,8 +50,8 @@ namespace Core
         void SetColliderProperty(const ColliderHandle& handle, float sf, float df, float e);
         void SetColliderCollision(const ColliderHandle& handle, const Collision::LayerMask& layer, CollisionMode mode);
 
-        void UpdateTransform(const RigidbodyHandle& handle, const Math::Vector2& pos, float rot, const Math::Vector2& scale);
-        void UpdateTransform(const ColliderHandle& handle, const Math::Vector2& pos, float rot, const Math::Vector2& scale);
+        void SetTransform(const RigidbodyHandle& handle, const Math::Vector2& pos, float rot, const Math::Vector2& scale);
+        void SetTransform(const ColliderHandle& handle, const Math::Vector2& pos, float rot, const Math::Vector2& scale);
         
         void SetLineCollider(const ColliderHandle& handle, float length);
         void SetBoxCollider(const ColliderHandle& handle, const Math::Vector2& ex);
@@ -65,6 +69,8 @@ namespace Core
         int GetCollisionPairCount() const;
         const std::vector<CollisionPair>& CollisionPairs() const;
 
+        void Step(float dt);
+
     private:
         template<typename T>
         requires std::derived_from<T, Collider>
@@ -74,8 +80,22 @@ namespace Core
         Collider* TryGetCollider<Collider>(const ColliderHandle& handle) const;
         Rigidbody* TryGetBody(const RigidbodyHandle& handle) const;
 
+        bool IsContinuousCollider(const ColliderHandle& handle) const;
+
+        void SynDynamicCollider(const RigidbodyHandle& handle);
         void SynDirtyCollider();
         void SynDiscreteBroadPhase();
         void SynContinuousBroadPhase(float dt);
+
+        Collision::ConvexDetectReq CreateConvexDetectReq(const ColliderHandle& collider) const;
+        Collision::ContinueDetectReq CreateContinueDetectReq(const Collision::BroadPhaseCollisionPair& collisionPair) const;
+        Solver::SolveReq CreateSolveReq(const CollisionPair& collisionPair) const;
+
+        void SubStep(float dt);
+        std::vector<CollisionPair> ContinuousCollisionStep(float& time);
+        std::vector<CollisionPair> DiscreteCollisionStep();
+        void BodyStep(float dt);
+        void TransformStep(float dt);
+        void SolveStep(std::vector<Solver::SolveReq>& reqs);
     };
 }

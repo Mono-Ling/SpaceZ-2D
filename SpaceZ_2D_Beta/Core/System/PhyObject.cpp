@@ -159,7 +159,7 @@ namespace Core
 
         _dirtyCollider.insert(handle);
     }
-    void PhySystem::UpdateTransform(const RigidbodyHandle& handle, const Vector2& pos, float rot, const Vector2& scale)
+    void PhySystem::SetTransform(const RigidbodyHandle& handle, const Vector2& pos, float rot, const Vector2& scale)
     {
         auto body = TryGetBody(handle);
         if(!body)
@@ -170,12 +170,9 @@ namespace Core
         transform.LocalRotation(rot);
         transform.LocalScale(scale);
 
-        auto it = _dynamicColliders.find(handle);
-        if(it != _dynamicColliders.end())
-            for(auto& collider : it->second)
-                _dirtyCollider.insert(collider);
+        SynDynamicCollider(handle);
     }
-    void PhySystem::UpdateTransform(const ColliderHandle& handle, const Vector2& pos, float rot, const Vector2& scale)
+    void PhySystem::SetTransform(const ColliderHandle& handle, const Vector2& pos, float rot, const Vector2& scale)
     {
         auto collider = TryGetCollider<Collider>(handle);
         if(!collider)
@@ -262,6 +259,24 @@ namespace Core
             return nullptr;
         return ptr;
     }
+    bool PhySystem::IsContinuousCollider(const ColliderHandle& handle) const
+    {
+        auto collider = TryGetCollider<Collider>(handle);
+        if(!collider)
+            return false;
+        return collider->collisionMode == CollisionMode::Continuous
+            && _bodies.Contains(collider->Body());
+    }
+    void PhySystem::SynDynamicCollider(const RigidbodyHandle& handle)
+    {
+        if(!_bodies.Contains(handle))
+            return;
+
+        auto it = _dynamicColliders.find(handle);
+        if(it != _dynamicColliders.end())
+            for(auto& collider : it->second)
+                _dirtyCollider.insert(collider);
+    }
     void PhySystem::SynDirtyCollider()
     {
         for(auto& handle : _dirtyCollider)
@@ -308,7 +323,7 @@ namespace Core
     }
     void PhySystem::SynContinuousBroadPhase(float dt)
     {
-        if(dt <= 0.0f)
+        if(dt < 0.0f)
             return;
         for(auto& handle : _continuousColliders)
         {
