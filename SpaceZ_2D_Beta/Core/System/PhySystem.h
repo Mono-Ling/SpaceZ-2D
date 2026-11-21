@@ -9,7 +9,9 @@
 #include "Core/Collision/Layer/LayerMask.h"
 #include "Core/Collision/Info/ConvexDetectReq.h"
 #include "Core/Collision/Info/ContinueDetectReq.h"
-#include "Core/System/CollisionPair.h"
+#include "Core/System/Info/CollisionPair.h"
+#include "Core/System/Info/RaycastHit.h"
+#include <vector>
 #include <unordered_set>
 #include <unordered_map>
 #include <functional>
@@ -71,6 +73,13 @@ namespace Core
 
         void Step(float dt);
 
+        std::vector<ColliderHandle> OverlapBox(const Math::Vector2& center, const Math::Vector2& size, float rotation, const Collision::LayerMask& layer) const;
+        std::vector<ColliderHandle> OverlapSphere(const Math::Vector2& center, float radius, float rotation, const Collision::LayerMask& layer) const;
+        std::vector<ColliderHandle> OverlapCapsule(const Math::Vector2& center, float radius, float height, float rotation, const Collision::LayerMask& layer) const;
+
+        bool Raycast(const Math::Vector2& origin, const Math::Vector2& direction, RaycastHit& hit, float maxDis, const Collision::LayerMask& layer) const;
+        std::vector<RaycastHit> RaycastAll(const Math::Vector2& origin, const Math::Vector2& direction, float maxDis, const Collision::LayerMask& layer) const;
+
     private:
         template<typename T>
         requires std::derived_from<T, Collider>
@@ -97,5 +106,7 @@ namespace Core
         void BodyStep(float dt);
         void TransformStep(float dt);
         void SolveStep(std::vector<Solver::SolveReq>& reqs);
+
+        std::vector<ColliderHandle> OverlapConvex(const Collision::Convex& convex, const Math::Vector2& center, float rotation, const Collision::LayerMask& layer) const;
     };
 }
