@@ -25,23 +25,41 @@ namespace Core
             func(handle, transform.Position(), transform.Rotation(), body->linearVelocity, body->angularVelocity);
         }
     }
-    int PhySystem::GetCollisionPairCount() const
+    int PhySystem::GetEnterCollisionPairsCount() const
     {
-        return static_cast<int>(_collisionPairs.size());
+        return static_cast<int>(_collisionPairs.EnterPairsCount());
     }
-    const std::vector<CollisionPair>& PhySystem::CollisionPairs() const
+    int PhySystem::GetStayCollisionPairsCount() const
     {
-        return _collisionPairs;
+        return static_cast<int>(_collisionPairs.StayPairsCount());
+    }
+    int PhySystem::GetExitCollisionPairsCount() const
+    {
+        return static_cast<int>(_collisionPairs.ExitPairsCount());
+    }
+    void PhySystem::ForeachEnterPairs(const function<void(const CollisionObj&, const vector<CollisionInfo>&)>& func) const
+    {
+        _collisionPairs.ForeachEnterPairs(func);
+    }
+    void PhySystem::ForeachStayPairs(const function<void(const CollisionObj&, const vector<CollisionInfo>&)>& func) const
+    {
+        _collisionPairs.ForeachStayPairs(func);
+    }
+    void PhySystem::ForeachExitPairs(const function<void(const CollisionObj&)>& func) const
+    {
+        _collisionPairs.ForeachExitPairs(func);
     }
     void PhySystem::Step(float dt)
     {
         _dirtyBodies.clear();
-        _collisionPairs.clear();
+        _collisionPairs.ResetVisible();
         if(dt <= 0.0f)
             return;
         float step = dt / _subStep;
         for(int i = 0; i < _subStep; i++)
             SubStep(step);
+
+        _collisionPairs.DiffExitPairs();
     }
 
     ConvexDetectReq PhySystem::CreateConvexDetectReq(const ColliderHandle& collider) const
@@ -112,7 +130,7 @@ namespace Core
             for(auto& p : pairs)
             {
                 solveReqs.emplace_back(CreateSolveReq(p));
-                _collisionPairs.emplace_back(p);
+                _collisionPairs.MovePair(p);
             }
 
             TransformStep(toi);
@@ -131,7 +149,7 @@ namespace Core
         for(auto& p : pairs)
         {
             solveReqs.emplace_back(CreateSolveReq(p));
-            _collisionPairs.emplace_back(p);
+            _collisionPairs.MovePair(p);
         }
         SolveStep(solveReqs);
     }

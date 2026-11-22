@@ -4,6 +4,7 @@
 #include "Core/Object/Container/ObjectMgr.h"
 #include "Core/Collision/BroadPhase/BVHTree.h"
 #include "Core/Solver/PhySolver.h"
+#include "Core/System/Buffer/CollisionPairBuffer.h"
 #include "Core/Object/PhyObject/Collider/ColliderType.h"
 #include "Core/Object/PhyObject/Collider/CollisionMode.h"
 #include "Core/Collision/Layer/LayerMask.h"
@@ -32,7 +33,7 @@ namespace Core
         std::unordered_set<ColliderHandle> _continuousColliders;
         std::unordered_set<ColliderHandle> _dirtyCollider;
         std::unordered_set<RigidbodyHandle> _dirtyBodies;
-        std::vector<CollisionPair> _collisionPairs;
+        CollisionPairBuffer _collisionPairs;
 
         Collision::BVHTree _broadPhase;
         Solver::PhySolver _solver;
@@ -68,8 +69,12 @@ namespace Core
         /// @param func (handle, position, rotation, linearV, angularV)
         void ForeachDirtyBodies(const std::function<void(const RigidbodyHandle&, const Math::Vector2&, float, const Math::Vector2&, float)>& func) const;
 
-        int GetCollisionPairCount() const;
-        const std::vector<CollisionPair>& CollisionPairs() const;
+        int GetEnterCollisionPairsCount() const;
+        int GetStayCollisionPairsCount() const;
+        int GetExitCollisionPairsCount() const;
+        void ForeachEnterPairs(const std::function<void(const CollisionObj&, const std::vector<Collision::CollisionInfo>&)>& func) const;
+        void ForeachStayPairs(const std::function<void(const CollisionObj&, const std::vector<Collision::CollisionInfo>&)>& func) const;
+        void ForeachExitPairs(const std::function<void(const CollisionObj&)>& func) const;
 
         void Step(float dt);
 

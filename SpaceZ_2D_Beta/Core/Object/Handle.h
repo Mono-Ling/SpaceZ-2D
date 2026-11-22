@@ -46,6 +46,12 @@ namespace Core
             return a._id == b._id && a._generation == b._generation;
         }
         friend bool operator!=(const Handle& a, const Handle& b) { return !(a == b); }
+        friend bool operator<(const Handle& a, const Handle& b)
+        {
+            if(a._generation != b._generation)
+                return a._generation < b._generation;
+            return a._id < b._id;
+        }
 
         static const Handle null;
     };
