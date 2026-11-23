@@ -27,6 +27,7 @@ namespace Core::Memory
         std::unordered_set<void*, std::hash<void*>, std::equal_to<void*>, MgrAllocator<void*>> _usingMemorySet;
 #endif
     public:
+        MemoryMgr() = default;
         MemoryMgr(const MemoryMgr& other) = delete;
         MemoryMgr(MemoryMgr&& other) = delete;
         ~MemoryMgr();

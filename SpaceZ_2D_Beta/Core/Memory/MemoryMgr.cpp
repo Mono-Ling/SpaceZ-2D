@@ -18,7 +18,9 @@ namespace Core::Memory
     }
     void* MemoryMgr::Alloc(size_t size)
     {
-        if(!size || size >= SIZE_MAX - 2 * HEADER_SIZE)
+        if(!size)
+            size = 1;
+        if(size >= SIZE_MAX - 2 * HEADER_SIZE)
             throw bad_alloc();
 
         const size_t allocSize = (HEADER_SIZE + size + HEADER_SIZE - 1) & ~(HEADER_SIZE - 1);
@@ -63,7 +65,7 @@ namespace Core::Memory
 
         return ansPtr;
     }
-    void MemoryMgr::Free(void* ptr)  noexcept(!IS_DEBUG)
+    void MemoryMgr::Free(void* ptr)
     {
         if(!ptr)
             return;
