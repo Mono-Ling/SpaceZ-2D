@@ -25,29 +25,14 @@ namespace Core::Memory
 
         const size_t allocSize = (HEADER_SIZE + size + HEADER_SIZE - 1) & ~(HEADER_SIZE - 1);
 
-        auto target = _freePageSet.end();
-        for(auto it = _freePageSet.begin(); it != _freePageSet.end(); it++)
-            if(it->size >= allocSize)
-            {
-                target = it;
-                break;
-            }
-
-        void* allocPtr = nullptr;
-        if(target != _freePageSet.end())
-        {
-            allocPtr = target->Cut(allocSize);
-
-            if(!target->size)
-                _freePageSet.erase(target);
-        }
-        else
+        void* allocPtr = _freePages.GetMemory(allocSize);
+        if(!allocPtr)
         {
             auto page = AllocPage(allocSize);
             allocPtr = page.Cut(allocSize);
 
             if(page)
-                _freePageSet.insert(page);
+                _freePages.PutMemory(page);
         }
 
         if(!allocPtr)
@@ -59,8 +44,7 @@ namespace Core::Memory
         void* ansPtr = reinterpret_cast<void*>(ans);
 
 #ifndef NDEBUG
-        if constexpr (IS_DEBUG)
-            _usingMemorySet.insert(ansPtr);
+        _usingMemorySet.insert(ansPtr);
 #endif
 
         return ansPtr;
@@ -71,13 +55,10 @@ namespace Core::Memory
             return;
 
 #ifndef NDEBUG
-        if constexpr (IS_DEBUG)
-        {
-            auto it = _usingMemorySet.find(ptr);
-            if(it == _usingMemorySet.end())
-                throw invalid_argument("【MemoryMgr】无效地址，释放失败");
-            _usingMemorySet.erase(it);
-        }
+        auto it = _usingMemorySet.find(ptr);
+        if(it == _usingMemorySet.end())
+            throw invalid_argument("【MemoryMgr】无效地址，释放失败");
+        _usingMemorySet.erase(it);
 #endif
 
         uintptr_t freeAddr = reinterpret_cast<uintptr_t>(ptr) - HEADER_SIZE;
@@ -87,29 +68,7 @@ namespace Core::Memory
         MemoryPage page(freeAddr, size);
         if(!page)
             return;
-        if(_freePageSet.empty())
-        {
-            _freePageSet.insert(page);
-            return;
-        }
-        auto it = _freePageSet.emplace(page).first;
-        bool leftMerge, rightMerge;
-        leftMerge = rightMerge = false;
-
-        if(it != prev(_freePageSet.end()))
-            rightMerge = it->TryMerge(*next(it));
-        if(it != _freePageSet.begin())
-            leftMerge = prev(it)->TryMerge(*it);
-        
-        if(!leftMerge && !rightMerge)
-            return;
-        
-        if(leftMerge && rightMerge)
-            _freePageSet.erase(it, next(it, 2));
-        else if(leftMerge)
-            _freePageSet.erase(it);
-        else
-            _freePageSet.erase(next(it));
+        _freePages.PutMemory(page);
     }
 
     MemoryPage MemoryMgr::AllocPage(std::size_t size)

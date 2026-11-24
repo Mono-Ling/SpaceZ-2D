@@ -1,7 +1,7 @@
 #pragma once
 #include "Core/Memory/MgrAllocator.h"
 #include "Core/Memory/MemoryPage.h"
-#include <set>
+#include "Core/Memory/MemoryPageTree.h"
 #include <vector>
 
 #ifndef NDEBUG
@@ -10,22 +10,17 @@
 
 namespace Core::Memory
 {
-#ifndef NDEBUG
-    constexpr bool IS_DEBUG = true;
-#else
-    constexpr bool IS_DEBUG = false;
-#endif
-
     constexpr std::size_t ALLOC_PAGE_SIZE = 1024 * 1024;
     constexpr std::size_t HEADER_SIZE = alignof(std::max_align_t);
 
     class MemoryMgr
     {
-        std::set<MemoryPage, std::less<MemoryPage>, MgrAllocator<MemoryPage>> _freePageSet;
+        MemoryPageTree _freePages;
         std::vector<void*, MgrAllocator<void*>> _allocPage;
 #ifndef NDEBUG
         std::unordered_set<void*, std::hash<void*>, std::equal_to<void*>, MgrAllocator<void*>> _usingMemorySet;
 #endif
+
     public:
         MemoryMgr() = default;
         MemoryMgr(const MemoryMgr& other) = delete;
