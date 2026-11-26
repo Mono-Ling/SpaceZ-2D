@@ -37,7 +37,7 @@ namespace UnityPlugin
     {
         if(!g_memoryMgr || !g_allocator)
             throw std::bad_alloc();
-        return g_memoryMgr->Allocate(g_allocator, size, alignof(std::max_align_t), __FILE__, __LINE__);
+        return g_memoryMgr->Allocate(g_allocator, size, __STDCPP_DEFAULT_NEW_ALIGNMENT__ , __FILE__, __LINE__);
     }
     static void Free(void* ptr)
     {

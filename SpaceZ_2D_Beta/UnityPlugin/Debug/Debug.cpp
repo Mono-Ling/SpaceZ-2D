@@ -2,6 +2,7 @@
 #include "UnityPlugin/UnityPlugin/UnityPlugin.h"
 #include "UnityPlugin/Debug/IUnityLog.h"
 #include "Core/Memory/GlobalMemory.h"
+#include "Core/Debug/Debug.h"
 
 namespace UnityPlugin
 {
@@ -28,6 +29,10 @@ namespace UnityPlugin
         OnUnityUnloadCallbacks().emplace_back(UnloadLogInterface);
 
         Core::Memory::g_memoryLogError = MemoryLogError;
+
+        Core::Debug::debugLog = UnityPlugin::Debug::Log;
+        Core::Debug::debugLogWarning = UnityPlugin::Debug::LogWarning;
+        Core::Debug::debugErrorLog = UnityPlugin::Debug::LogError;
         return true;
     }();
 }

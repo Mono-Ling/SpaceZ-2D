@@ -11,7 +11,7 @@
 namespace Core::Memory
 {
     constexpr std::size_t ALLOC_PAGE_SIZE = 1024 * 1024;
-    constexpr std::size_t HEADER_SIZE = alignof(std::max_align_t);
+    constexpr std::size_t HEADER_SIZE = __STDCPP_DEFAULT_NEW_ALIGNMENT__;
 
     class MemoryMgr
     {
