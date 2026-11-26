@@ -33,6 +33,9 @@ namespace Core::Memory
         void* Alloc(std::size_t size);
         void Free(void* ptr);
 
+        void* Alloc(std::size_t size, std::align_val_t al);
+        void Free(void* ptr, std::align_val_t al);
+
     private:
         MemoryPage AllocPage(std::size_t size);
     };

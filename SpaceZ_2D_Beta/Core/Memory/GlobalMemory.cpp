@@ -41,6 +41,12 @@ void* ::operator new(size_t size)
         throw bad_alloc();
     return g_memoryMgr->Alloc(size);
 }
+void* ::operator new(std::size_t size, std::align_val_t al)
+{
+    if(!g_memoryMgr)
+        throw bad_alloc();
+    return g_memoryMgr->Alloc(size, al);
+}
 void* ::operator new(size_t size, const nothrow_t&) noexcept
 {
     if(!g_memoryMgr)
@@ -78,12 +84,38 @@ void ::operator delete(void* ptr) noexcept
         MemoryLogError("【全局内存管理】Unknow Error");
     }
 }
+void ::operator delete(void* ptr, std::align_val_t al) noexcept
+{
+    if(!g_memoryMgr)
+    {
+        MemoryLogError("【全局内存管理】Free异常，内存管理器已失活");
+        return;
+    }
+    try
+    {
+        g_memoryMgr->Free(ptr, al);
+    }
+    catch(const exception& e)
+    {
+        MemoryLogError(e.what());
+    }
+    catch(...)
+    {
+        MemoryLogError("【全局内存管理】Unknow Error");
+    }
+}
 
 void* ::operator new[](size_t size)
 {
     if(!g_memoryMgr)
         throw bad_alloc();
     return g_memoryMgr->Alloc(size);
+}
+void* ::operator new[](std::size_t size, std::align_val_t al)
+{
+    if(!g_memoryMgr)
+        throw bad_alloc();
+    return g_memoryMgr->Alloc(size, al);
 }
 void* ::operator new[](size_t size, const nothrow_t&) noexcept
 {
@@ -112,6 +144,26 @@ void  ::operator delete[](void* ptr) noexcept
     try
     {
         g_memoryMgr->Free(ptr);
+    }
+    catch(const exception& e)
+    {
+        MemoryLogError(e.what());
+    }
+    catch(...)
+    {
+        MemoryLogError("【全局内存管理】Unknow Error");
+    }
+}
+void ::operator delete[](void* ptr, std::align_val_t al) noexcept
+{
+    if(!g_memoryMgr)
+    {
+        MemoryLogError("【全局内存管理】Free异常，内存管理器已失活");
+        return;
+    }
+    try
+    {
+        g_memoryMgr->Free(ptr, al);
     }
     catch(const exception& e)
     {

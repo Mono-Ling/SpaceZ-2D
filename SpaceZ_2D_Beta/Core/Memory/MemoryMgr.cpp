@@ -70,6 +70,32 @@ namespace Core::Memory
             return;
         _freePages.PutMemory(page);
     }
+    void* MemoryMgr::Alloc(size_t size, align_val_t al)
+    {
+        if(!size)
+            size = 1;
+        size_t align = static_cast<size_t>(al);
+        size_t extra = align - 1 + sizeof(void*);
+        
+        if(size > SIZE_MAX - extra)
+            throw bad_alloc();
+        void* total = Alloc(size + extra);
+        auto totalAddr = reinterpret_cast<uintptr_t>(total);
+        auto userAddr = (totalAddr + sizeof(void*) + align - 1) & ~(align - 1);
+
+        void** originPtr = reinterpret_cast<void**>(userAddr - sizeof(void*));
+        *originPtr = total;
+
+        return reinterpret_cast<void*>(userAddr);
+    }
+    void MemoryMgr::Free(void* ptr, align_val_t)
+    {
+        if(!ptr)
+            return;
+        auto addr = reinterpret_cast<uintptr_t>(ptr) - sizeof(void*);
+        auto originPtr = reinterpret_cast<void**>(addr);
+        Free(*originPtr);
+    }
 
     MemoryPage MemoryMgr::AllocPage(std::size_t size)
     {
