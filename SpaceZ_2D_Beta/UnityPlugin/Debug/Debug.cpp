@@ -17,18 +17,13 @@ namespace UnityPlugin
     {
         logPtr = nullptr;
     }
-    static void MemoryLogError(const char* message)
-    {
-        if (logPtr)
-            UNITY_LOG_ERROR(logPtr, message);
-    }
 
     static bool init = []() -> bool
     {
         OnUnityLoadCallbacks().emplace_back(LoadLogInterface);
         OnUnityUnloadCallbacks().emplace_back(UnloadLogInterface);
 
-        Core::Memory::g_memoryLogError = MemoryLogError;
+        Core::Memory::g_memoryLogError = UnityPlugin::Debug::MemoryLogError;
 
         Core::Debug::debugLog = UnityPlugin::Debug::Log;
         Core::Debug::debugLogWarning = UnityPlugin::Debug::LogWarning;
@@ -53,5 +48,10 @@ namespace UnityPlugin::Debug
     {
         if (logPtr)
             UNITY_LOG_ERROR(logPtr, message.data());
+    }
+    void MemoryLogError(const char* message)
+    {
+        if (logPtr)
+            UNITY_LOG_ERROR(logPtr, message);
     }
 }

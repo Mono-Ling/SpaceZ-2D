@@ -20,12 +20,16 @@ namespace UnityPlugin
         g_allocator = g_memoryMgr->CreateAllocator("SpaceZ-2D-Beta Native", "Global Heap Allocator");
 
         Core::Memory::EnableGlobalMemoryMgr();
+
+        g_isGlobalMemoryReady = g_allocator != nullptr;
     }
     static void UnloadMemoryInterface()
     {
         if(!g_memoryMgr || !g_allocator)
             return;
 
+        g_isGlobalMemoryReady = false;
+        
         Core::Memory::DisableGlobalMemoryMgr();
 
         g_memoryMgr->DestroyAllocator(g_allocator);

@@ -15,10 +15,7 @@ namespace UnityPlugin
     EXPORT_FUNCTION void StartEngine(int subStep, int iteration)
     {
         if(g_phySystem)
-        {
-            Debug::LogWarning("【Export PhyEngine】物理引擎重复启动");
             return;
-        }
         TRY_CATCH_DEBUG
         (
             {

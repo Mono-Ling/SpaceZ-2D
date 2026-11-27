@@ -8,6 +8,8 @@ typedef void (*OnUnityPluginUnloadFunc)();
 
 namespace UnityPlugin
 {
+    inline bool g_isGlobalMemoryReady = false;
+
     template<typename T>
     using Action = std::vector<T, NativeAllocator<T>>;
 
